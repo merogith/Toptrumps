@@ -99,47 +99,51 @@ function clear(el: HTMLElement): void {
 }
 
 function render(): void {
-  const app = document.querySelector<HTMLElement>("#app");
-  if (!app) return;
-  setAccent(game.theme);
-  clear(app);
+  try {
+    const app = document.querySelector<HTMLElement>("#app");
+    if (!app) return;
+    setAccent(game.theme);
+    clear(app);
 
-  const main = document.createElement("main");
-  main.className = "stack";
+    const main = document.createElement("main");
+    main.className = "stack";
 
-  switch (game.screen) {
-    case "home":
-      main.appendChild(renderHome());
-      break;
-    case "how_to_play":
-      main.appendChild(renderHowToPlay());
-      break;
-    case "theme_pick":
-      main.appendChild(renderThemePick());
-      break;
-    case "pass_device":
-      main.appendChild(renderPassDevice());
-      break;
-    case "choose_stat":
-      main.appendChild(renderChooseStat());
-      break;
-    case "reveal_prompt":
-      main.appendChild(renderRevealPrompt());
-      break;
-    case "opponent_view":
-      main.appendChild(renderOpponentView());
-      break;
-    case "round_result":
-      main.appendChild(renderRoundResult());
-      break;
-    case "game_over":
-      main.appendChild(renderGameOver());
-      break;
-    default:
-      main.textContent = "Unknown screen";
+    switch (game.screen) {
+      case "home":
+        main.appendChild(renderHome());
+        break;
+      case "how_to_play":
+        main.appendChild(renderHowToPlay());
+        break;
+      case "theme_pick":
+        main.appendChild(renderThemePick());
+        break;
+      case "pass_device":
+        main.appendChild(renderPassDevice());
+        break;
+      case "choose_stat":
+        main.appendChild(renderChooseStat());
+        break;
+      case "reveal_prompt":
+        main.appendChild(renderRevealPrompt());
+        break;
+      case "opponent_view":
+        main.appendChild(renderOpponentView());
+        break;
+      case "round_result":
+        main.appendChild(renderRoundResult());
+        break;
+      case "game_over":
+        main.appendChild(renderGameOver());
+        break;
+      default:
+        main.textContent = "Unknown screen";
+    }
+
+    app.appendChild(main);
+  } catch (e) {
+    showBootError(e, "render");
   }
-
-  app.appendChild(main);
 }
 
 function renderHome(): HTMLElement {
@@ -269,6 +273,29 @@ function escapeHtml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function showBootError(err: unknown, context: "boot" | "render" = "boot"): void {
+  const app = document.querySelector("#app");
+  const msg = err instanceof Error ? err.message : String(err);
+  const stack = err instanceof Error ? err.stack ?? "" : "";
+  const title = context === "render" ? "Something broke during play" : "Something went wrong";
+  const subtitle =
+    context === "render"
+      ? "The screen could not be drawn. Your progress may be inconsistent — refresh the page to restart."
+      : "The game did not start. Details below help when debugging.";
+  console.error(context === "boot" ? "Top Trumps failed to start:" : "Top Trumps render error:", err);
+  if (app) {
+    app.innerHTML = `
+      <main class="stack" style="padding:1.5rem;max-width:36rem;margin:0 auto;font-family:system-ui,sans-serif">
+        <h1 style="color:#f87171;margin:0 0 0.5rem">${escapeHtml(title)}</h1>
+        <p style="color:#cbd5e1;margin:0 0 1rem">${escapeHtml(subtitle)}</p>
+        <pre style="background:#1e1e2e;color:#e4e4e7;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;white-space:pre-wrap">${escapeHtml(
+          msg + (stack ? "\n\n" + stack : "")
+        )}</pre>
+        <p style="color:#94a3b8;font-size:0.9rem;margin-top:1rem">Try <code>npm install</code> then <code>npm run dev</code>. If you deployed to GitHub Pages, run <code>npm run build:gh</code> so asset paths match the repo name.</p>
+      </main>`;
+  }
 }
 
 function renderPassDevice(): HTMLElement {
@@ -605,5 +632,9 @@ function sanityCheckDecks(): void {
   }
 }
 
-sanityCheckDecks();
-render();
+try {
+  sanityCheckDecks();
+  render();
+} catch (e) {
+  showBootError(e);
+}

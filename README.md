@@ -5,8 +5,14 @@ Pass-and-play Top Trumps for two people on one device: **Galactic legends**, **F
 ## Scripts
 
 - `npm run dev` — local dev server
-- `npm run build` — production build to `dist/`
+- `npm run build` — production build to `dist/` (root URL, e.g. `localhost` or your own host)
+- `npm run build:gh` — build for **GitHub Project Pages** when the site lives at `https://<user>.github.io/Toptrumps/` (sets Vite `--base /Toptrumps/`)
 - `npm test` — game engine unit tests
+
+## Troubleshooting
+
+- **Blank page on GitHub Pages** — use `npm run build:gh` (not plain `npm run build`) so JS/CSS paths include `/Toptrumps/`. Publish the `dist/` output to your Pages branch or `gh-pages`.
+- **Errors** — if something throws, the app shows a red error panel with the message and stack (and logs to the browser console).
 
 ## Rules
 
