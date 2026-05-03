@@ -4,7 +4,7 @@ Pass-and-play Top Trumps for two people on one device: **Galactic legends**, **F
 
 ## Scripts
 
-- `npm run dev` — local dev server
+- `npm run dev` — dev server (listens on **all interfaces** so you can use `localhost` or your LAN IP). Default port **5173**; if it is busy, Vite picks the next port — **read the terminal** for the exact URL.
 - `npm run build` — production build to `dist/` (root URL, e.g. `localhost` or your own host)
 - `npm run build:gh` — build for **GitHub Project Pages** when the site lives at `https://<user>.github.io/Toptrumps/` (sets Vite `--base /Toptrumps/`)
 - `npm test` — game engine unit tests
