@@ -7,9 +7,14 @@
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc && vite build",
     "build:gh": "tsc && vite build --base /Toptrumps/",
-    "preview": "vite preview",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "preview:gh": "vite preview --base /Toptrumps/ --host 0.0.0.0 --port 4173",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "ci": "npm test && npm run build && npm run build:gh"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
     "typescript": "~5.4.5",

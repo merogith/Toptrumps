@@ -32,7 +32,24 @@ Do **not** use plain `npm run build` for GitHub Pages for this repo name — ass
 - `npm run dev` — dev server (`--host 0.0.0.0`). Default port **5173**; if busy, Vite uses **5174**, etc. — use the URL printed in the terminal.
 - `npm run build` — production build to `dist/` for root hosting (e.g. local preview).
 - `npm run build:gh` — production build with **`/Toptrumps/`** base for GitHub Project Pages (also used by CI).
-- `npm test` — game engine unit tests
+- `npm test` — game engine and data tests
+- `npm run ci` — runs **tests + `build` + `build:gh`** (same checks as local “ready to ship”)
+
+### Verify before manual testing
+
+```bash
+npm install
+npm run ci          # must pass
+npm run dev         # open the Local URL from the terminal
+```
+
+To sanity-check the **GitHub Pages** bundle locally (optional):
+
+```bash
+npm run build:gh && npm run preview:gh
+```
+
+Then open **http://localhost:4173/Toptrumps/** — app and assets should load under the `/Toptrumps/` prefix.
 
 ## Troubleshooting
 

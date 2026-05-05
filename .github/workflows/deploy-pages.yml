@@ -28,10 +28,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm test
-
-      # Must match repository name for Project Pages: /<repo>/
-      - run: npm run build:gh
+      - run: npm run ci
 
       - uses: actions/upload-pages-artifact@v3
         with:
