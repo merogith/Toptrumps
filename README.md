@@ -2,17 +2,42 @@
 
 Pass-and-play Top Trumps for two people on one device: **Galactic legends**, **Foundation & empire**, and **Warriors of the age** (30 cards each, six stats). Card images use `public/card-placeholder.svg` until you add artwork.
 
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open the URL printed in the terminal (usually **http://localhost:5173/**). If that port is busy, Vite uses **5174**, **5175**, etc.
+
+If the screen stays blank, open the browser **Developer Tools → Console**. Startup errors also show a red message on the page when possible.
+
+## GitHub Pages
+
+This repo is set up for **Project Pages**: the site URL is:
+
+**https://\<user\>.github.io/Toptrumps/**
+
+Important:
+
+1. **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions** (not “Deploy from a branch” unless you manually upload `dist`).
+2. Merge or push the workflow in `.github/workflows/deploy-pages.yml`. On each push to `main`, Actions builds with **`npm run build:gh`** (correct **`/Toptrumps/`** base path) and publishes **`dist/`**.
+3. Wait for the green workflow run, then open **https://\<your-username\>.github.io/Toptrumps/**.
+
+Do **not** use plain `npm run build` for GitHub Pages for this repo name — asset URLs would be wrong unless you change `--base` to match your actual repo name.
+
 ## Scripts
 
-- `npm run dev` — dev server (listens on **all interfaces** so you can use `localhost` or your LAN IP). Default port **5173**; if it is busy, Vite picks the next port — **read the terminal** for the exact URL.
-- `npm run build` — production build to `dist/` (root URL, e.g. `localhost` or your own host)
-- `npm run build:gh` — build for **GitHub Project Pages** when the site lives at `https://<user>.github.io/Toptrumps/` (sets Vite `--base /Toptrumps/`)
+- `npm run dev` — dev server (`--host 0.0.0.0`). Default port **5173**; if busy, Vite uses **5174**, etc. — use the URL printed in the terminal.
+- `npm run build` — production build to `dist/` for root hosting (e.g. local preview).
+- `npm run build:gh` — production build with **`/Toptrumps/`** base for GitHub Project Pages (also used by CI).
 - `npm test` — game engine unit tests
 
 ## Troubleshooting
 
-- **Blank page on GitHub Pages** — use `npm run build:gh` (not plain `npm run build`) so JS/CSS paths include `/Toptrumps/`. Publish the `dist/` output to your Pages branch or `gh-pages`.
-- **Errors** — if something throws, the app shows a red error panel with the message and stack (and logs to the browser console).
+- **Blank page on GitHub** — In the repo: **Settings → Pages → Source: GitHub Actions**. Wait for the workflow to finish; the site is **`https://<username>.github.io/Toptrumps/`**. Do not deploy a plain `npm run build` to Pages manually unless you change `--base` to match the repo path.
+- **Blank locally** — Run `npm install`, then `npm run dev`, open the exact URL from the terminal. Check **Console** (F12); errors may also appear as a red panel on the page.
 
 ## Rules
 
