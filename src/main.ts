@@ -107,6 +107,7 @@ function render(): void {
 
     const main = document.createElement("main");
     main.className = "stack";
+    main.dataset.screen = game.screen;
 
     switch (game.screen) {
       case "home":

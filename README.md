@@ -33,7 +33,18 @@ Do **not** use plain `npm run build` for GitHub Pages for this repo name — ass
 - `npm run build` — production build to `dist/` for root hosting (e.g. local preview).
 - `npm run build:gh` — production build with **`/Toptrumps/`** base for GitHub Project Pages (also used by CI).
 - `npm test` — game engine and data tests
-- `npm run ci` — runs **tests + `build` + `build:gh`** (same checks as local “ready to ship”)
+- `npm run test:e2e` — Playwright: plays a **full match** in Chromium against the dev server
+- `npm run ci` — runs **unit tests + e2e game test + `build` + `build:gh`**
+
+### Automated checks (game playable end-to-end)
+
+```bash
+npm install
+npx playwright install chromium   # first time only
+npm run ci                        # unit tests + browser game test + both builds
+```
+
+`npm run test:e2e` opens Chromium, starts the dev server, plays **Choose deck → first theme → full match until game over**.
 
 ### Verify before manual testing
 
