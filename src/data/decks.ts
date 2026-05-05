@@ -1,6 +1,7 @@
 import type { Card, DeckTheme } from "../types";
 
-const PLACEHOLDER_IMG = "/card-placeholder.svg";
+/** Works with Vite base path (e.g. GitHub Pages at /Toptrumps/). */
+const PLACEHOLDER_IMG = `${import.meta.env.BASE_URL}card-placeholder.svg`;
 
 function galacticNames(): { name: string; subtitle: string }[] {
   return [
