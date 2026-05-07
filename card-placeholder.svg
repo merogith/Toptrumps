@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Card artwork placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a26"/>
+      <stop offset="100%" stop-color="#0e0e16"/>
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#252532" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="320" height="200" fill="url(#bg)"/>
+  <rect width="320" height="200" fill="url(#grid)" opacity="0.6"/>
+  <!-- Centre diamond icon -->
+  <g transform="translate(160,94)">
+    <polygon points="0,-38 30,0 0,38 -30,0" fill="none" stroke="#3a3a50" stroke-width="2"/>
+    <polygon points="0,-22 18,0 0,22 -18,0" fill="#252535"/>
+    <!-- card suit symbol -->
+    <text text-anchor="middle" dominant-baseline="central" fill="#4a4a62"
+          font-family="system-ui,sans-serif" font-size="18" font-weight="600">♟</text>
+  </g>
+  <!-- Corner dots -->
+  <circle cx="24" cy="24" r="3" fill="#2e2e42"/>
+  <circle cx="296" cy="24" r="3" fill="#2e2e42"/>
+  <circle cx="24" cy="176" r="3" fill="#2e2e42"/>
+  <circle cx="296" cy="176" r="3" fill="#2e2e42"/>
+  <!-- Bottom label -->
+  <text x="160" y="182" text-anchor="middle" fill="#3a3a52"
+        font-family="system-ui,sans-serif" font-size="10" font-weight="600" letter-spacing="0.1em">ARTWORK · PLACEHOLDER</text>
+</svg>
