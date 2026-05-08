@@ -123,9 +123,10 @@ function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = {}): HT
   /* Image */
   const imgWrap = el("div", "card-image-wrap");
   const img = document.createElement("img");
-  img.src = cardImageUrl(theme.id, card.id);
+  img.src = card.image ?? cardImageUrl(theme.id, card.id);
   img.alt = "";
   img.decoding = "async";
+  img.onerror = () => { img.src = cardImageUrl(theme.id, card.id); };
   imgWrap.appendChild(img);
   wrap.appendChild(imgWrap);
 
