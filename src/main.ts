@@ -843,7 +843,9 @@ function renderOpponentView(): HTMLElement {
     }
     render();
   });
-  frag.appendChild(revealBtn);
+  const revealDock = el("div", "play-cta-dock");
+  revealDock.appendChild(revealBtn);
+  frag.appendChild(revealDock);
 
   return frag;
 }
@@ -903,6 +905,29 @@ function renderRoundResult(): HTMLElement {
   cmp.append(p1side, divider, p2side);
   frag.appendChild(cmp);
 
+  /* Primary action up front on small screens — card grid is tall */
+  const scoreLine = el("p");
+  scoreLine.style.textAlign = "center";
+  scoreLine.style.fontSize = "0.85rem";
+  let scoreText = `Cards remaining — ${pLabel(1)}: ${game.p1.length} · ${pLabel(2)}: ${game.p2.length}`;
+  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
+  scoreLine.textContent = scoreText;
+  frag.appendChild(scoreLine);
+
+  const matchFinished = game.p1.length === 0 || game.p2.length === 0;
+
+  const nextBtn = el("button", "btn btn-primary");
+  nextBtn.type = "button";
+  nextBtn.textContent = matchFinished ? "Finish" : "Next round";
+  nextBtn.addEventListener("click", () => {
+    game = continueAfterRound(game);
+    if (game.screen === "game_over") {
+      announce(game.winner ? `${playerLabel(game.winner, game)} wins the match!` : "Game over.");
+    }
+    render();
+  });
+  frag.appendChild(nextBtn);
+
   /* Both cards side by side */
   const grid = el("div", "compare-grid two");
 
@@ -928,29 +953,6 @@ function renderRoundResult(): HTMLElement {
 
   grid.append(wrap1, wrap2);
   frag.appendChild(grid);
-
-  /* Card count */
-  const scoreLine = el("p");
-  scoreLine.style.textAlign = "center";
-  scoreLine.style.fontSize = "0.85rem";
-  let scoreText = `Cards remaining — ${pLabel(1)}: ${game.p1.length} · ${pLabel(2)}: ${game.p2.length}`;
-  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
-  scoreLine.textContent = scoreText;
-  frag.appendChild(scoreLine);
-
-  const matchFinished = game.p1.length === 0 || game.p2.length === 0;
-
-  const nextBtn = el("button", "btn btn-primary");
-  nextBtn.type = "button";
-  nextBtn.textContent = matchFinished ? "Finish" : "Next round";
-  nextBtn.addEventListener("click", () => {
-    game = continueAfterRound(game);
-    if (game.screen === "game_over") {
-      announce(game.winner ? `${playerLabel(game.winner, game)} wins the match!` : "Game over.");
-    }
-    render();
-  });
-  frag.appendChild(nextBtn);
 
   const tb = el("div", "toolbar");
   const quit = el("button", "btn btn-danger btn-sm");
