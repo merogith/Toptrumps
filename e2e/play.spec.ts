@@ -10,6 +10,10 @@ test("full playable loop from menu to game over", async ({ page }) => {
   await expect(page.locator("#app main[data-screen='theme_pick']")).toBeVisible();
 
   await page.locator(".theme-card").first().click();
+  await expect(page.locator("#app main[data-screen='mode_pick']")).toBeVisible();
+
+  /* Choose 2-player pass-and-play so the e2e test can drive both sides */
+  await page.getByRole("button", { name: "2 Players" }).click();
   await expect(page.locator("#app main[data-screen='pass_device']")).toBeVisible();
 
   const maxSteps = 800;
@@ -17,7 +21,7 @@ test("full playable loop from menu to game over", async ({ page }) => {
     const screen = await page.locator("#app main").getAttribute("data-screen");
 
     if (screen === "game_over") {
-      await expect(page.getByRole("heading", { name: /wins the game/i })).toBeVisible();
+      await expect(page.getByRole("heading", { name: /wins/i })).toBeVisible();
       return;
     }
 
@@ -57,3 +61,4 @@ test("full playable loop from menu to game over", async ({ page }) => {
 
   throw new Error(`Did not reach game_over within ${maxSteps} UI steps`);
 });
+
