@@ -14,6 +14,8 @@ export interface Card {
   id: string;
   name: string;
   subtitle?: string;
+  /** Artwork URL or inline data URI. Falls back to placeholder SVG if absent or on error. */
+  image?: string;
   stats: Record<string, number>;
 }
 
