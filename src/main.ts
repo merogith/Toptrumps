@@ -93,12 +93,13 @@ function el<K extends keyof HTMLElementTagNameMap>(
 interface CardRenderOpts {
   activeStatId?: string | null;
   compact?: boolean;
-  winnerOutcome?: PlayerId | "tie" | null; // which player won this round
-  thisPlayer?: PlayerId | null;             // which player this card belongs to
+  winnerOutcome?: PlayerId | "tie" | null;
+  thisPlayer?: PlayerId | null;
+  onStatSelect?: (statId: string) => void;
 }
 
 function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = {}): HTMLElement {
-  const { activeStatId, compact = false, winnerOutcome, thisPlayer } = opts;
+  const { activeStatId, compact = false, winnerOutcome, thisPlayer, onStatSelect } = opts;
 
   const wrap = document.createElement("article");
   wrap.className = "game-card" + (compact ? " compact" : "");
@@ -144,7 +145,9 @@ function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = {}): HT
   /* Stats */
   const statsDiv = el("div", "card-stats");
   for (const s of theme.stats) {
-    const row = el("div", "card-stat-row");
+    const row = onStatSelect
+      ? el("button", "card-stat-row")
+      : el("div", "card-stat-row");
     const isActive = activeStatId === s.id;
 
     if (isActive) {
@@ -152,6 +155,11 @@ function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = {}): HT
       if (winnerOutcome && thisPlayer && winnerOutcome === thisPlayer) {
         row.classList.add("is-win");
       }
+    }
+
+    if (onStatSelect) {
+      (row as HTMLButtonElement).type = "button";
+      row.addEventListener("click", () => onStatSelect(s.id));
     }
 
     const lbl = el("span", "stat-lbl");
@@ -483,33 +491,15 @@ function renderChooseStat(): HTMLElement {
   const card = leaderCard(game);
   if (!card) { frag.appendChild(document.createTextNode("No cards remaining.")); return frag; }
 
-  frag.appendChild(renderCard(game.theme, card, { activeStatId: null }));
-
-  const hint = el("p");
-  hint.textContent = "Your top card is shown. Tap a stat to challenge your opponent — higher value wins.";
-  hint.style.textAlign = "center";
-  hint.style.fontSize = "0.85rem";
-  frag.appendChild(hint);
-
-  const grid = el("div", "stat-grid");
-  for (const s of game.theme.stats) {
-    const b = el("button", "stat-btn");
-    b.type = "button";
-
-    const lbl = el("span", "sb-label");
-    lbl.textContent = s.label;
-    const val = el("span", "sb-value");
-    val.textContent = String(card.stats[s.id]);
-
-    b.append(lbl, val);
-    b.addEventListener("click", () => {
-      game = selectStat(game, s.id);
-      announce(`${s.label} chosen. Pass to ${pLabel(game.deviceHolder)}.`);
+  frag.appendChild(renderCard(game.theme, card, {
+    activeStatId: null,
+    onStatSelect: (statId) => {
+      const stat = game.theme!.stats.find((s) => s.id === statId);
+      game = selectStat(game, statId);
+      announce(`${stat?.label ?? statId} chosen. Pass to ${pLabel(game.deviceHolder)}.`);
       render();
-    });
-    grid.appendChild(b);
-  }
-  frag.appendChild(grid);
+    },
+  }));
 
   const tb = el("div", "toolbar");
   const quit = el("button", "btn btn-danger btn-sm");

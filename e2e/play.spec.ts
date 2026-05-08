@@ -27,7 +27,7 @@ test("full playable loop from menu to game over", async ({ page }) => {
     }
 
     if (screen === "choose_stat") {
-      await page.locator("#app main .stat-btn").first().click();
+      await page.locator("#app main button.card-stat-row").first().click();
       continue;
     }
 
