@@ -858,15 +858,20 @@ button.card-stat-row:focus-visible {
   padding-top: 0.5rem;
 }
 
-/* Fixed primary CTA on phone — reveal stays thumb-reachable over tall cards */
+/*
+ * Primary game actions (Reveal, Next round). On narrow viewports and touch
+ * devices, pin to the viewport bottom so landscape phones (often >720px wide)
+ * still avoid scrolling past tall cards. Desktop keeps normal document flow.
+ */
 .play-cta-dock {
   display: flex;
   flex-direction: column;
   align-items: stretch;
 }
 
-@media (max-width: 719px) {
-  main[data-screen="opponent_view"] {
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  main[data-screen="opponent_view"],
+  main[data-screen="round_result"] {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
   }
 
@@ -875,7 +880,7 @@ button.card-stat-row:focus-visible {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 40;
+    z-index: 100;
     padding: 0.55rem 1rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
     background: color-mix(in srgb, var(--bg) 93%, transparent);
     -webkit-backdrop-filter: blur(12px);
@@ -891,7 +896,7 @@ button.card-stat-row:focus-visible {
   }
 }
 
-@media (min-width: 720px) {
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .play-cta-dock {
     position: static;
     padding: 0;
@@ -900,6 +905,11 @@ button.card-stat-row:focus-visible {
     box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  main[data-screen="opponent_view"],
+  main[data-screen="round_result"] {
+    padding-bottom: 0;
   }
 }
 

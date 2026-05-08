@@ -926,7 +926,9 @@ function renderRoundResult(): HTMLElement {
     }
     render();
   });
-  frag.appendChild(nextBtn);
+  const nextDock = el("div", "play-cta-dock");
+  nextDock.appendChild(nextBtn);
+  frag.appendChild(nextDock);
 
   /* Both cards side by side */
   const grid = el("div", "compare-grid two");
