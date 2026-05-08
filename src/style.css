@@ -611,9 +611,32 @@ p:last-child { margin-bottom: 0; }
   font-size: 0.875rem;
   transition: background 0.12s ease;
   margin: 0 -0.5rem;
+  width: calc(100% + 1rem);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  background: transparent;
 }
 
 .card-stat-row:first-child { border-top: none; }
+
+button.card-stat-row {
+  cursor: pointer;
+  min-height: var(--touch-min, 44px);
+}
+
+button.card-stat-row:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+button.card-stat-row:active {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+button.card-stat-row:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -2px;
+}
 
 .card-stat-row.is-active {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -652,56 +675,9 @@ p:last-child { margin-bottom: 0; }
 .game-card.compact .card-name { font-size: 0.88rem; }
 .game-card.compact .card-sub { font-size: 0.68rem; }
 .game-card.compact .card-stats { padding: 0 0.6rem 0.5rem; }
-.game-card.compact .card-stat-row { padding: 0.28rem 0.4rem; font-size: 0.78rem; margin: 0 -0.4rem; }
+.game-card.compact .card-stat-row { padding: 0.28rem 0.4rem; font-size: 0.78rem; margin: 0 -0.4rem; width: calc(100% + 0.8rem); }
 .game-card.compact .stat-val { font-size: 0.82rem; min-width: 1.8rem; }
 
-/* === STAT SELECTION BUTTONS === */
-.stat-grid {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.stat-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: var(--touch-min);
-  padding: 0.7rem 1rem;
-  border-radius: var(--r-btn);
-  border: 2px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease, transform 0.1s ease;
-}
-
-.stat-btn:hover {
-  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-  background: var(--surface-raised);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
-  transform: translateX(2px);
-}
-
-.stat-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.stat-btn:active { transform: translateX(0) scale(0.98); }
-
-.stat-btn .sb-label {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text);
-}
-
-.stat-btn .sb-value {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--accent);
-  min-width: 2.5rem;
-  text-align: right;
-}
 
 /* === ROUND RESULT === */
 .result-banner {
