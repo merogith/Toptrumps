@@ -21,17 +21,18 @@ This repo is set up for **Project Pages**: the site URL is:
 
 Important:
 
-1. **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions** (not “Deploy from a branch” unless you manually upload `dist`).
-2. Merge or push the workflow in `.github/workflows/deploy-pages.yml`. On each push to `main`, Actions builds with **`npm run build:gh`** (correct **`/Toptrumps/`** base path) and publishes **`dist/`**.
+1. **Settings → Pages → Build and deployment → Source:** choose **Deploy from a branch**, **Branch:** `main`, **Folder:** **`/docs`** (not `/ (root)` — the repo root `index.html` is the Vite dev entry and will not run as a static site).
+2. On each push to `main`, the workflow in `.github/workflows/deploy-pages.yml` runs tests, runs **`npm run build:docs`** (production bundle with base **`/Toptrumps/`**), writes **`docs/.nojekyll`**, and commits the **`docs/`** folder so Pages serves the compiled app.
 3. Wait for the green workflow run, then open **https://\<your-username\>.github.io/Toptrumps/**.
 
-Do **not** use plain `npm run build` for GitHub Pages for this repo name — asset URLs would be wrong unless you change `--base` to match your actual repo name.
+If you previously used the **`gh-pages`** branch or **GitHub Actions** as the Pages source, switch to **main** + **`/docs`** so the live site matches `main`. Do **not** use plain `npm run build` for GitHub Pages for this repo name — asset URLs would be wrong unless you change `--base` to match your actual repo name.
 
 ## Scripts
 
 - `npm run dev` — dev server (`--host 0.0.0.0`). Default port **5173**; if busy, Vite uses **5174**, etc. — use the URL printed in the terminal.
 - `npm run build` — production build to `dist/` for root hosting (e.g. local preview).
-- `npm run build:gh` — production build with **`/Toptrumps/`** base for GitHub Project Pages (also used by CI).
+- `npm run build:gh` — production build to `dist/` with **`/Toptrumps/`** base for GitHub Project Pages (preview locally with `preview:gh`).
+- `npm run build:docs` — same as **`build:gh`** but outputs to **`docs/`** for branch-based Pages (**main** + **`/docs`**).
 - `npm test` — game engine and data tests
 - `npm run test:e2e` — Playwright: plays a **full match** in Chromium against the dev server
 - `npm run ci` — runs **unit tests + e2e game test + `build` + `build:gh`**
@@ -64,7 +65,7 @@ Then open **http://localhost:4173/Toptrumps/** — app and assets should load un
 
 ## Troubleshooting
 
-- **Blank page on GitHub** — In the repo: **Settings → Pages → Source: GitHub Actions**. Wait for the workflow to finish; the site is **`https://<username>.github.io/Toptrumps/`**. Do not deploy a plain `npm run build` to Pages manually unless you change `--base` to match the repo path.
+- **Blank page on GitHub** — In the repo: **Settings → Pages → Source: Deploy from a branch → main → `/docs`**. Wait for the workflow to finish; the site is **`https://<username>.github.io/Toptrumps/`**. Do not deploy the repo root as Pages unless you only serve the built **`docs/`** output.
 - **Blank locally** — Run `npm install`, then `npm run dev`, open the exact URL from the terminal. Check **Console** (F12); errors may also appear as a red panel on the page.
 
 ## Rules
