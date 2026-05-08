@@ -109,6 +109,7 @@ describe("continueAfterRound", () => {
         higherIsBetter: true,
       },
       winner: null,
+      bot: null,
     };
     const next = continueAfterRound(g);
     expect(next.screen).toBe("game_over");

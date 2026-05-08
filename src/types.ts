@@ -1,5 +1,7 @@
 export type PlayerId = 1 | 2;
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 export interface StatDef {
   id: string;
   label: string;
@@ -30,6 +32,7 @@ export type ScreenId =
   | "home"
   | "how_to_play"
   | "theme_pick"
+  | "mode_pick"
   | "pass_device"
   | "choose_stat"
   | "reveal_prompt"
@@ -60,4 +63,6 @@ export interface GameSnapshot {
     higherIsBetter: boolean;
   } | null;
   winner: PlayerId | null;
+  /** Null means 2-player pass-and-play. When set, that player is the bot. */
+  bot: { player: PlayerId; difficulty: Difficulty } | null;
 }

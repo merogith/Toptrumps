@@ -10,12 +10,83 @@ import {
   selectStat,
   validateDeck,
 } from "./engine";
-import type { Card, DeckTheme, GameSnapshot, PlayerId } from "./types";
+import { decideStat } from "./bot";
+import type { Card, DeckTheme, Difficulty, GameSnapshot, PlayerId } from "./types";
 
 /* ============================================================
    STATE
    ============================================================ */
 let game: GameSnapshot = abandonToHome();
+
+/* ============================================================
+   BOT SCHEDULER
+   ============================================================ */
+let botTimerId: ReturnType<typeof setTimeout> | null = null;
+
+function clearBotTimer(): void {
+  if (botTimerId !== null) {
+    clearTimeout(botTimerId);
+    botTimerId = null;
+  }
+}
+
+function executeBotAction(): void {
+  if (!game.bot) return;
+  const { player: botPlayer, difficulty } = game.bot;
+
+  switch (game.screen) {
+    case "pass_device":
+      game = acknowledgePass(game);
+      break;
+    case "choose_stat":
+      if (game.leader === botPlayer) {
+        game = selectStat(game, decideStat(game, botPlayer, difficulty));
+      }
+      break;
+    case "reveal_prompt":
+      game = acknowledgeRevealPass(game);
+      break;
+    case "opponent_view":
+      if (game.deviceHolder === botPlayer) {
+        game = revealAndResolve(game);
+        if (game.lastRound) {
+          if (game.lastRound.winner === "tie") announce("Draw — cards go to the centre pile.");
+          else announce(`${playerLabel(game.lastRound.winner as PlayerId, game)} wins the trick.`);
+        }
+      }
+      break;
+  }
+}
+
+function scheduleBot(): void {
+  if (!game.bot || botTimerId !== null) return;
+  const { player: botPlayer, difficulty } = game.bot;
+
+  let delay = 0;
+  let shouldAct = false;
+
+  if (game.screen === "pass_device") {
+    shouldAct = true;
+    delay = 0;
+  } else if (game.screen === "choose_stat" && game.leader === botPlayer) {
+    shouldAct = true;
+    delay = difficulty === "easy" ? 1200 : difficulty === "medium" ? 800 : 500;
+  } else if (game.screen === "reveal_prompt") {
+    shouldAct = true;
+    delay = 0;
+  } else if (game.screen === "opponent_view" && game.deviceHolder === botPlayer) {
+    shouldAct = true;
+    delay = 0;
+  }
+
+  if (!shouldAct) return;
+
+  botTimerId = setTimeout(() => {
+    botTimerId = null;
+    executeBotAction();
+    render();
+  }, delay);
+}
 
 /* ============================================================
    ARIA LIVE REGION
@@ -59,6 +130,16 @@ function escapeHtml(s: string): string {
 }
 
 function pLabel(id: PlayerId): string { return `Player ${id}`; }
+
+function playerLabel(id: PlayerId, g: GameSnapshot): string {
+  if (!g.bot) return `Player ${id}`;
+  if (id === g.bot.player) {
+    return g.bot.difficulty === "hard" ? "Hard Bot"
+         : g.bot.difficulty === "medium" ? "Medium Bot"
+         : "Easy Bot";
+  }
+  return "You";
+}
 
 function cardNum(cardId: string): string {
   const n = parseInt(cardId.replace(/\D/g, ""), 10);
@@ -180,19 +261,24 @@ function renderHUD(g: GameSnapshot): HTMLElement {
 
   const p1 = el("div", "hud-player");
   const p1lbl = el("span");
-  p1lbl.textContent = "P1";
+  p1lbl.textContent = g.bot ? (g.bot.player === 1 ? "Bot" : "You") : "P1";
   const p1cnt = el("span", "hud-count" + (p1Leads ? " is-leading" : ""));
   p1cnt.textContent = String(p1Count);
   p1.append(p1lbl, p1cnt);
 
   const theme = el("span", "hud-theme");
-  theme.textContent = g.theme?.title.split(" ").slice(0, 2).join(" ") ?? "";
+  if (g.bot) {
+    const diffShort = g.bot.difficulty === "hard" ? "Hard" : g.bot.difficulty === "medium" ? "Med" : "Easy";
+    theme.textContent = `${g.theme?.title.split(" ").slice(0, 2).join(" ") ?? ""} · ${diffShort}`;
+  } else {
+    theme.textContent = g.theme?.title.split(" ").slice(0, 2).join(" ") ?? "";
+  }
 
   const p2 = el("div", "hud-player");
   const p2cnt = el("span", "hud-count" + (p2Leads ? " is-leading" : ""));
   p2cnt.textContent = String(p2Count);
   const p2lbl = el("span");
-  p2lbl.textContent = "P2";
+  p2lbl.textContent = g.bot ? (g.bot.player === 2 ? "Bot" : "You") : "P2";
   p2.append(p2cnt, p2lbl);
 
   hud.append(p1, theme, p2);
@@ -224,6 +310,7 @@ function render(): void {
       case "home":          main.appendChild(renderHome()); break;
       case "how_to_play":   main.appendChild(renderHowToPlay()); break;
       case "theme_pick":    main.appendChild(renderThemePick()); break;
+      case "mode_pick":     main.appendChild(renderModePick()); break;
       case "pass_device":   main.appendChild(renderPassDevice()); break;
       case "choose_stat":   main.appendChild(renderChooseStat()); break;
       case "reveal_prompt": main.appendChild(renderRevealPrompt()); break;
@@ -236,6 +323,7 @@ function render(): void {
     app.appendChild(main);
     /* Scroll to top on each transition */
     window.scrollTo({ top: 0, behavior: "instant" });
+    scheduleBot();
   } catch (e) {
     showBootError(e, "render");
   }
@@ -374,9 +462,7 @@ function renderThemePick(): HTMLElement {
     `;
 
     btn.addEventListener("click", () => {
-      const seed = (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0;
-      game = newGame(deck, seed);
-      announce(`${deck.title} started. Pass to ${pLabel(game.deviceHolder)}.`);
+      game = { ...game, screen: "mode_pick", theme: deck };
       render();
     });
 
@@ -396,11 +482,119 @@ function renderThemePick(): HTMLElement {
 }
 
 /* ============================================================
+   MODE PICKER  (2-player vs bot, and difficulty)
+   ============================================================ */
+function renderModePick(): HTMLElement {
+  const frag = el("div", "stack");
+  const deck = game.theme;
+  if (!deck) return frag;
+
+  const icon = DECK_ICONS[deck.id] ?? "🎴";
+
+  /* Deck context strip */
+  const strip = el("div", "mode-deck-strip");
+  const stripIcon = el("span", "mds-icon");
+  stripIcon.setAttribute("aria-hidden", "true");
+  stripIcon.textContent = icon;
+  const stripInfo = el("div");
+  const stripName = el("div", "mds-name");
+  stripName.textContent = deck.title;
+  const stripTag = el("div", "mds-tag");
+  stripTag.textContent = deck.tagline;
+  stripInfo.append(stripName, stripTag);
+  strip.append(stripIcon, stripInfo);
+  frag.appendChild(strip);
+
+  /* Section: pass & play */
+  const humanLabel = el("p", "mode-section-label");
+  humanLabel.textContent = "Pass & play";
+  frag.appendChild(humanLabel);
+
+  const twoBtn = el("button", "mode-2p-btn");
+  twoBtn.type = "button";
+  const m2pIcon = el("span", "m2p-icon");
+  m2pIcon.setAttribute("aria-hidden", "true");
+  m2pIcon.textContent = "👥";
+  const m2pText = el("span");
+  const m2pName = el("span", "m2p-name");
+  m2pName.textContent = "2 Players";
+  const m2pDesc = el("span", "m2p-desc");
+  m2pDesc.textContent = "Two humans take turns on one screen";
+  m2pText.append(m2pName, m2pDesc);
+  twoBtn.append(m2pIcon, m2pText);
+  twoBtn.addEventListener("click", () => {
+    const seed = (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0;
+    game = newGame(deck, seed, null);
+    announce(`${deck.title} started. Pass to Player 1.`);
+    render();
+  });
+  frag.appendChild(twoBtn);
+
+  /* Section: vs computer */
+  const botLabel = el("p", "mode-section-label");
+  botLabel.textContent = "Vs computer";
+  frag.appendChild(botLabel);
+
+  const diffGrid = el("div", "mode-diff-grid");
+
+  const diffs: Array<{ d: Difficulty; icon: string; name: string; desc: string }> = [
+    { d: "easy",   icon: "👾", name: "Easy",   desc: "Slips up sometimes" },
+    { d: "medium", icon: "🤖", name: "Medium", desc: "Plays its best stat every turn" },
+    { d: "hard",   icon: "🧠", name: "Hard",   desc: "Counts every card in the deck" },
+  ];
+
+  for (const item of diffs) {
+    const btn = el("button", "mode-diff-btn");
+    btn.type = "button";
+
+    const ico = el("div", "mdb-icon");
+    ico.setAttribute("aria-hidden", "true");
+    ico.textContent = item.icon;
+
+    const name = el("div", "mdb-name");
+    name.textContent = item.name;
+
+    const desc = el("div", "mdb-desc");
+    desc.textContent = item.desc;
+
+    btn.append(ico, name, desc);
+    btn.addEventListener("click", () => {
+      const seed = (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0;
+      game = newGame(deck, seed, { player: 2, difficulty: item.d });
+      announce(`${deck.title} vs ${item.name} bot. Your turn first.`);
+      render();
+    });
+    diffGrid.appendChild(btn);
+  }
+  frag.appendChild(diffGrid);
+
+  /* Back button */
+  const tb = el("div", "toolbar");
+  const back = el("button", "btn btn-ghost");
+  back.type = "button";
+  back.textContent = "← Back to decks";
+  back.addEventListener("click", () => {
+    game = { ...game, screen: "theme_pick" };
+    render();
+  });
+  tb.appendChild(back);
+  frag.appendChild(tb);
+
+  return frag;
+}
+
+/* ============================================================
    PASS DEVICE  (privacy gate — two confirmations per round)
    ============================================================ */
 function renderPassDevice(): HTMLElement {
   const frag = el("div", "stack");
   if (!game.theme) return frag;
+
+  /* In bot mode all pass_device screens auto-advance — just show the HUD */
+  if (game.bot) {
+    frag.appendChild(renderHUD(game));
+    return frag;
+  }
 
   frag.appendChild(renderHUD(game));
 
@@ -449,6 +643,7 @@ function renderPassDevice(): HTMLElement {
   quit.textContent = "Abandon match";
   quit.addEventListener("click", () => {
     if (confirm("Abandon this match and return to the main menu?")) {
+      clearBotTimer();
       game = abandonToHome();
       announce("Returned to menu.");
       render();
@@ -458,6 +653,30 @@ function renderPassDevice(): HTMLElement {
   frag.appendChild(quitRow);
 
   return frag;
+}
+
+/* ============================================================
+   BOT THINKING SCREEN (shown while bot picks a stat)
+   ============================================================ */
+function renderBotThinking(difficulty: Difficulty): HTMLElement {
+  const icons: Record<Difficulty, string> = { easy: "👾", medium: "🤖", hard: "🧠" };
+  const names: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
+
+  const wrap = el("div", "bot-thinking");
+
+  const iconDiv = el("div", "bot-think-icon");
+  iconDiv.setAttribute("aria-hidden", "true");
+  iconDiv.textContent = icons[difficulty];
+
+  const label = el("h2", "bot-think-label");
+  label.textContent = `${names[difficulty]} bot is choosing…`;
+
+  const dots = el("div", "bot-think-dots");
+  dots.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < 3; i++) dots.appendChild(document.createElement("span"));
+
+  wrap.append(iconDiv, label, dots);
+  return wrap;
 }
 
 /* ============================================================
@@ -473,10 +692,16 @@ function renderChooseStat(): HTMLElement {
 
   frag.appendChild(renderHUD(game));
 
+  /* Bot is the leader — show thinking indicator, auto-picks via scheduleBot */
+  if (game.bot && game.bot.player === game.leader) {
+    frag.appendChild(renderBotThinking(game.bot.difficulty));
+    return frag;
+  }
+
   const banner = el("div", "player-banner");
   const dot = el("span", "banner-dot");
   const bannerText = el("span");
-  bannerText.textContent = `${pLabel(game.leader)} — pick a stat to challenge`;
+  bannerText.textContent = `${playerLabel(game.leader, game)} — pick a stat to challenge`;
   banner.append(dot, bannerText);
   frag.appendChild(banner);
 
@@ -504,7 +729,7 @@ function renderChooseStat(): HTMLElement {
     b.append(lbl, val);
     b.addEventListener("click", () => {
       game = selectStat(game, s.id);
-      announce(`${s.label} chosen. Pass to ${pLabel(game.deviceHolder)}.`);
+      announce(`${s.label} chosen.`);
       render();
     });
     grid.appendChild(b);
@@ -516,7 +741,7 @@ function renderChooseStat(): HTMLElement {
   quit.type = "button";
   quit.textContent = "Abandon match";
   quit.addEventListener("click", () => {
-    if (confirm("Abandon this match?")) { game = abandonToHome(); render(); }
+    if (confirm("Abandon this match?")) { clearBotTimer(); game = abandonToHome(); render(); }
   });
   tb.appendChild(quit);
   frag.appendChild(tb);
@@ -530,6 +755,12 @@ function renderChooseStat(): HTMLElement {
 function renderRevealPrompt(): HTMLElement {
   const frag = el("div", "stack");
   if (!game.theme || !game.pendingStatId) return frag;
+
+  /* In bot mode the privacy step is unnecessary — auto-advances */
+  if (game.bot) {
+    frag.appendChild(renderHUD(game));
+    return frag;
+  }
 
   frag.appendChild(renderHUD(game));
 
@@ -581,13 +812,19 @@ function renderOpponentView(): HTMLElement {
   const frag = el("div", "stack");
   if (!game.theme || !game.pendingStatId) return frag;
 
+  /* Bot is the challenger — auto-reveals, show HUD briefly */
+  if (game.bot && game.deviceHolder === game.bot.player) {
+    frag.appendChild(renderHUD(game));
+    return frag;
+  }
+
   frag.appendChild(renderHUD(game));
 
   const chall = challenger(game);
   const banner = el("div", "player-banner");
   const dot = el("span", "banner-dot");
   const bannerText = el("span");
-  bannerText.textContent = `${pLabel(chall)} — your top card`;
+  bannerText.textContent = `${playerLabel(chall, game)} — your top card`;
   banner.append(dot, bannerText);
   frag.appendChild(banner);
 
@@ -639,7 +876,7 @@ function renderRoundResult(): HTMLElement {
   icon.textContent = isTie ? "🤝" : "🏆";
 
   const headline = el("h1");
-  headline.textContent = isTie ? "Draw!" : `${pLabel(winnerPid!)} wins!`;
+  headline.textContent = isTie ? "Draw!" : `${playerLabel(winnerPid!, game)} wins!`;
 
   const statLine = el("p", "result-stat-line");
   statLine.innerHTML = `<strong>${escapeHtml(lr.statLabel)}</strong> · ${lr.higherIsBetter ? "higher wins" : "lower wins"}`;
@@ -657,7 +894,7 @@ function renderRoundResult(): HTMLElement {
 
   const p1side = el("div", "sc-player");
   const p1lbl = el("div", "sc-label");
-  p1lbl.textContent = pLabel(1);
+  p1lbl.textContent = playerLabel(1, game);
   const p1val = el("div", `sc-value${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
   p1val.textContent = String(lr.p1Value);
   p1side.append(p1lbl, p1val);
@@ -667,7 +904,7 @@ function renderRoundResult(): HTMLElement {
 
   const p2side = el("div", "sc-player");
   const p2lbl = el("div", "sc-label");
-  p2lbl.textContent = pLabel(2);
+  p2lbl.textContent = playerLabel(2, game);
   const p2val = el("div", `sc-value${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
   p2val.textContent = String(lr.p2Value);
   p2side.append(p2lbl, p2val);
@@ -680,7 +917,7 @@ function renderRoundResult(): HTMLElement {
 
   const wrap1 = el("div", "compare-player");
   const lbl1 = el("div", `compare-player-label${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  lbl1.textContent = pLabel(1) + (!isTie && winnerPid === 1 ? " 🏆" : "");
+  lbl1.textContent = playerLabel(1, game) + (!isTie && winnerPid === 1 ? " 🏆" : "");
   wrap1.append(lbl1, renderCard(game.theme, lr.p1Card, {
     activeStatId: lr.statId,
     compact: true,
@@ -690,7 +927,7 @@ function renderRoundResult(): HTMLElement {
 
   const wrap2 = el("div", "compare-player");
   const lbl2 = el("div", `compare-player-label${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  lbl2.textContent = pLabel(2) + (!isTie && winnerPid === 2 ? " 🏆" : "");
+  lbl2.textContent = playerLabel(2, game) + (!isTie && winnerPid === 2 ? " 🏆" : "");
   wrap2.append(lbl2, renderCard(game.theme, lr.p2Card, {
     activeStatId: lr.statId,
     compact: true,
@@ -718,9 +955,7 @@ function renderRoundResult(): HTMLElement {
   nextBtn.addEventListener("click", () => {
     game = continueAfterRound(game);
     if (game.screen === "game_over") {
-      announce(game.winner ? `${pLabel(game.winner)} wins the match!` : "Game over.");
-    } else if (game.screen === "pass_device") {
-      announce(`Pass to ${pLabel(game.deviceHolder)}.`);
+      announce(game.winner ? `${playerLabel(game.winner, game)} wins the match!` : "Game over.");
     }
     render();
   });
@@ -731,7 +966,7 @@ function renderRoundResult(): HTMLElement {
   quit.type = "button";
   quit.textContent = "Abandon match";
   quit.addEventListener("click", () => {
-    if (confirm("Abandon this match?")) { game = abandonToHome(); render(); }
+    if (confirm("Abandon this match?")) { clearBotTimer(); game = abandonToHome(); render(); }
   });
   tb.appendChild(quit);
   frag.appendChild(tb);
@@ -753,12 +988,12 @@ function renderGameOver(): HTMLElement {
 
   const headline = el("h1");
   headline.textContent = game.winner
-    ? `${pLabel(game.winner)} wins the game!`
+    ? `${playerLabel(game.winner, game)} wins!`
     : "Game over!";
 
   const sub = el("p");
   sub.textContent = game.winner
-    ? `${pLabel(game.winner)} collected all 30 cards — classic Top Trumps victory.`
+    ? `${playerLabel(game.winner, game)} collected all 30 cards — classic Top Trumps victory.`
     : "The deck ran out with no clear winner.";
 
   hero.append(trophy, headline, sub);
@@ -796,7 +1031,7 @@ function renderGameOver(): HTMLElement {
     const deck = game.theme?.id ? getDeckById(game.theme.id) : undefined;
     if (deck) {
       const seed = (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0;
-      game = newGame(deck, seed);
+      game = newGame(deck, seed, game.bot);  /* preserve mode (2P or bot difficulty) */
       announce("New match started.");
     }
     render();

@@ -43,7 +43,11 @@ export function findStatDef(theme: DeckTheme, statId: string): StatDef | undefin
   return theme.stats.find((s) => s.id === statId);
 }
 
-export function newGame(theme: DeckTheme, seed: number): GameSnapshot {
+export function newGame(
+  theme: DeckTheme,
+  seed: number,
+  bot: GameSnapshot["bot"] = null
+): GameSnapshot {
   const shuffled = shuffle(theme.cards, seed).map((c) => c.id);
   const byId = new Map(theme.cards.map((c) => [c.id, c]));
   const ordered = shuffled.map((id) => byId.get(id)!);
@@ -63,6 +67,7 @@ export function newGame(theme: DeckTheme, seed: number): GameSnapshot {
     pendingStatId: null,
     lastRound: null,
     winner: null,
+    bot,
   };
 }
 
@@ -221,6 +226,7 @@ export function abandonToHome(): GameSnapshot {
     pendingStatId: null,
     lastRound: null,
     winner: null,
+    bot: null,
   };
 }
 
