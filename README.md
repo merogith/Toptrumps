@@ -70,22 +70,37 @@ Then open **http://localhost:4173/Toptrumps/** — app and assets should load un
 
 ## Card artwork
 
-Out of the box every card renders a themed SVG generated inline in `src/data/decks.ts`. To replace those with real photos / paintings from the English Wikipedia:
+Cards render the real subject's image — Star Wars ships from Wookieepedia, Foundation characters from the Foundation Fandom wiki, medieval warriors from Wikipedia — when those have been populated into `public/cards/`. If a card file is missing, `src/data/decks.ts` falls back to a themed SVG (halo + corner brackets + accent nameplate) and the `<img onerror>` in `src/main.ts` is a second safety net.
+
+### Populate the images
 
 ```bash
 npm run fetch:cards
 ```
 
-The script (`scripts/fetch-card-art.mjs`, Node ≥18, no extra dependencies):
+`scripts/fetch-card-art.mjs` (Node ≥18, no dependencies):
 
-- Reads a `cardId → Wikipedia article title` map embedded at the top of the file. Edit it freely.
-- Calls `https://en.wikipedia.org/api/rest_v1/page/summary/<title>` for each card and downloads the article's lead thumbnail.
-- Writes the images to `public/cards/<cardId>.<ext>` and updates `src/data/card-art-manifest.json` with the relative paths it produced.
-- Commit the resulting `public/cards/*` and `src/data/card-art-manifest.json` — Vite will copy them into `dist/` and `docs/` on the next build, so GitHub Pages serves them too.
+- Reads a `cardId → [(source, article-title), …]` map at the top of the file. Sources are:
+  - `wookieepedia` → `starwars.fandom.com`
+  - `foundation`   → `foundation.fandom.com`
+  - `wikipedia`    → `en.wikipedia.org`
+- Calls each source's MediaWiki `api.php` (`prop=pageimages`, `pithumbsize=480`, `redirects=1`) until one returns a thumbnail.
+- Downloads to `public/cards/<cardId>.<ext>` and merges the relative path into `src/data/card-art-manifest.json` (existing entries are kept, so a partial run is safe).
+- Cards that strike out on every candidate keep the themed SVG fallback.
 
-Cards whose title is `null` or whose Wikipedia article has no lead image keep the themed SVG. The `<img onerror>` handler in `src/main.ts` also falls back to `public/card-placeholder.svg` if any individual file is missing at runtime, so a partially populated `public/cards/` directory is safe.
+CI does this automatically — see `.github/workflows/deploy-pages.yml`, which runs `npm run fetch:cards` before `npm run build:docs` on every push to `main` and commits both `docs/` and the freshly populated `public/cards/` back to the branch.
 
-**Copyright note:** the Star Wars and *Foundation* decks reference copyrighted franchises. The mapping in `scripts/fetch-card-art.mjs` only points at English Wikipedia article images (typically fair-use thumbnails on Wikipedia, free media for medieval topics). If you redistribute the populated `public/cards/` folder, make sure each individual file's licence permits it — Wikimedia Commons images include licence metadata on their `File:` page. Most ship/character cards are left as `null` because their Wikipedia articles do not contain a free representative image; the themed SVG is shown instead.
+### Fair-use notice — please read
+
+The Star Wars and *Foundation* article thumbnails on the Fandom wikis are uploaded there for editorial commentary under fair-use claims (low-resolution stills used in articles *about* the depicted subject). Using those same low-resolution thumbnails inside a personal, non-commercial Top Trumps deck is the same legal posture: educational / fan-game fair use. You should:
+
+- Keep this repository non-commercial (no ads, no paid distribution, no merchandise).
+- Not redistribute the populated `public/cards/` folder as a standalone image set.
+- Treat the deployed GitHub Pages site as a personal hobby project (Disney/Lucasfilm own Star Wars; Apple TV+ and the Asimov estate own *Foundation*).
+
+The medieval cards pull from English Wikipedia, where lead images are usually public-domain paintings, engravings, and woodcuts that can be reused freely.
+
+If you'd rather not host any third-party imagery, delete `public/cards/`, set `src/data/card-art-manifest.json` to `{}`, and remove the `fetch:cards` step from `.github/workflows/deploy-pages.yml`. The app will fall back to the themed SVG illustrations for every card.
 
 ## Rules
 
