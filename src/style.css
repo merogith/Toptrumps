@@ -115,6 +115,29 @@ main.stack { padding-top: 1.25rem; }
   gap: 1.1rem;
 }
 
+/* Mobile-friendly primary action bar.
+   Pins to the top of the viewport so the player never has to scroll
+   past tall card content to reach Next round / Reveal. */
+.cta-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: -1.25rem -1rem 0;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-top, 0px));
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.cta-top .btn {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.95rem 1rem;
+  min-height: 3.1rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

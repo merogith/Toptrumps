@@ -35,16 +35,20 @@ jobs:
 
       - run: npm run test:e2e
 
+      - name: Fetch real card artwork from Wikipedia
+        run: npm run fetch:cards
+        continue-on-error: true
+
       - run: npm run build:docs
 
       - name: Add .nojekyll (suppress Jekyll processing)
         run: touch docs/.nojekyll
 
-      - name: Commit and push docs/ to main
+      - name: Commit and push docs/ + fetched card art to main
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add docs/
-          git diff --staged --quiet && echo "No changes to docs/" && exit 0
-          git commit -m "chore: rebuild docs/ from ${GITHUB_SHA::8}"
+          git add docs/ public/cards/ src/data/card-art-manifest.json 2>/dev/null || true
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: rebuild docs/ + refresh card art from ${GITHUB_SHA::8}"
           git push origin HEAD:${{ github.ref_name }}
