@@ -616,7 +616,9 @@ p:last-child { margin-bottom: 0; }
   letter-spacing: 0.05em;
 }
 
-/* Card image */
+/* Card image. Most candidate art is portrait-tall (characters, painted
+   warriors, Pokémon sprites) so center-cropping a 16/10 box cuts off
+   the head. object-position favours the upper third where faces live. */
 .card-image-wrap {
   position: relative;
   overflow: hidden;
@@ -629,13 +631,14 @@ p:last-child { margin-bottom: 0; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 28%;
 }
 
 .card-image-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 60%, rgba(14, 14, 20, 0.7) 100%);
+  background: linear-gradient(to bottom, transparent 55%, rgba(14, 14, 20, 0.78) 100%);
   pointer-events: none;
 }
 

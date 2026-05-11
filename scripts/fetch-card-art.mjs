@@ -2,23 +2,31 @@
 // Fetches a representative image for every card. Resolution order per card:
 //
 //   1. EXPLICIT — try each (source, title) candidate in the card's list.
-//        Sources: wookieepedia, foundation, wikipedia.
+//        Sources: wookieepedia, foundation, bulbapedia, spongebob, wikipedia.
+//        Special source "url" → the "title" is a direct image URL; downloads
+//        as-is (used for PokeAPI official artwork where MediaWiki returns
+//        no usable thumbnail).
 //   2. SEARCH   — for each source used by this card, run MediaWiki
-//        generator=search with the card's first candidate as the query and
-//        take the highest-ranked article that has a pageimage.
-//   3. WIKIPEDIA — if Wikipedia wasn't already tried, search Wikipedia.
+//        generator=search with the card's first candidate as the query.
+//        STRICT TITLE MATCH: only accept a result whose title contains every
+//        ≥3-letter token of the query. This rejects "Pikachu (Pokémon)" →
+//        "Pokémon Pikachu" (the toy) and similar fictional-name fuzz hits.
+//   3. WIKIPEDIA — if Wikipedia wasn't already tried, search Wikipedia
+//        (same strict-title-match rule).
 //   4. COMMONS  — search Wikimedia Commons for any compatibly-licensed
-//        bitmap matching the card name (lots of public-domain art lives
-//        only on Commons, not attached to an article).
+//        bitmap matching the card name (same strict-title-match rule on the
+//        File: title so we don't accept random photos containing one word).
 //   5. DECK FALLBACK — a thematic image guaranteed to exist for the deck
 //        (book cover for Foundation, hero ship for Star Wars, medieval
-//        painting for Medieval). So every card lands on SOMETHING.
+//        painting for Medieval, franchise logo for Pokémon/SpongeBob).
+//        So every card lands on SOMETHING on-theme.
 //
-// LEGAL: fan-wiki imagery (Wookieepedia / Foundation Fandom) is hosted
-// under fair-use claims for editorial coverage; using it unchanged at
-// low resolution inside a personal non-commercial Top Trumps deck is
-// the same fair-use posture. Wikipedia/Commons content is mostly
-// public-domain or CC-licensed. Don't redistribute the populated
+// LEGAL: fan-wiki imagery (Wookieepedia / Foundation Fandom / Bulbapedia /
+// SpongeBob Wiki) is hosted under fair-use claims for editorial coverage;
+// using it unchanged at low resolution inside a personal non-commercial
+// Top Trumps deck is the same fair-use posture. PokeAPI official artwork is
+// reused widely under fan-game fair-use as well. Wikipedia/Commons content
+// is mostly public-domain or CC-licensed. Don't redistribute the populated
 // public/cards/ folder commercially. To opt out, delete public/cards/,
 // blank the manifest, and remove the fetch step from CI.
 //
@@ -56,6 +64,13 @@ const DECK_FALLBACK = {
   poke:  ["wikipedia", "Pokémon"],                    // franchise logo
   sb:    ["wikipedia", "SpongeBob SquarePants"],      // show logo
 };
+
+// PokeAPI hosts official Game Freak artwork at a stable URL pattern keyed by
+// National Dex number. Used because Bulbapedia returns no pageimage and
+// Wikipedia search for "Pikachu (Pokémon)" hits the Pikachu virtual-pet toy
+// article, JAL's Pokémon-themed jumbo jet article, etc. — not the character.
+const POKEAPI_ART = (dex) =>
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${dex}.png`;
 
 // (source, title) candidates per card. Beyond these, the script will
 // automatically fall back to search → Commons → deck-fallback.
@@ -158,38 +173,41 @@ const CARDS = {
   "med-29": [["wikipedia", "Rajput"]],
   "med-30": [["wikipedia", "Knights Hospitaller"]],
 
-  // ---------- Pokémon Gen 1 — Bulbapedia → Wikipedia ----------
-  // Bulbapedia article titles use "{Name} (Pokémon)".
-  "poke-01": [["bulbapedia", "Bulbasaur (Pokémon)"],  ["wikipedia", "Bulbasaur"]],
-  "poke-02": [["bulbapedia", "Ivysaur (Pokémon)"],    ["wikipedia", "Ivysaur"]],
-  "poke-03": [["bulbapedia", "Venusaur (Pokémon)"],   ["wikipedia", "Venusaur"]],
-  "poke-04": [["bulbapedia", "Charmander (Pokémon)"], ["wikipedia", "Charmander"]],
-  "poke-05": [["bulbapedia", "Charmeleon (Pokémon)"], ["wikipedia", "Charmeleon"]],
-  "poke-06": [["bulbapedia", "Charizard (Pokémon)"],  ["wikipedia", "Charizard"]],
-  "poke-07": [["bulbapedia", "Squirtle (Pokémon)"],   ["wikipedia", "Squirtle"]],
-  "poke-08": [["bulbapedia", "Wartortle (Pokémon)"],  ["wikipedia", "Wartortle"]],
-  "poke-09": [["bulbapedia", "Blastoise (Pokémon)"],  ["wikipedia", "Blastoise"]],
-  "poke-10": [["bulbapedia", "Pikachu (Pokémon)"],    ["wikipedia", "Pikachu"]],
-  "poke-11": [["bulbapedia", "Raichu (Pokémon)"],     ["wikipedia", "Raichu"]],
-  "poke-12": [["bulbapedia", "Mewtwo (Pokémon)"],     ["wikipedia", "Mewtwo"]],
-  "poke-13": [["bulbapedia", "Mew (Pokémon)"],        ["wikipedia", "Mew (Pokémon)"]],
-  "poke-14": [["bulbapedia", "Snorlax (Pokémon)"],    ["wikipedia", "Snorlax"]],
-  "poke-15": [["bulbapedia", "Gyarados (Pokémon)"],   ["wikipedia", "Gyarados"]],
-  "poke-16": [["bulbapedia", "Lapras (Pokémon)"],     ["wikipedia", "Lapras"]],
-  "poke-17": [["bulbapedia", "Dragonite (Pokémon)"],  ["wikipedia", "Dragonite"]],
-  "poke-18": [["bulbapedia", "Eevee (Pokémon)"],      ["wikipedia", "Eevee"]],
-  "poke-19": [["bulbapedia", "Vaporeon (Pokémon)"],   ["wikipedia", "Vaporeon"]],
-  "poke-20": [["bulbapedia", "Jolteon (Pokémon)"],    ["wikipedia", "Jolteon"]],
-  "poke-21": [["bulbapedia", "Flareon (Pokémon)"],    ["wikipedia", "Flareon"]],
-  "poke-22": [["bulbapedia", "Articuno (Pokémon)"],   ["wikipedia", "Articuno"]],
-  "poke-23": [["bulbapedia", "Zapdos (Pokémon)"],     ["wikipedia", "Zapdos"]],
-  "poke-24": [["bulbapedia", "Moltres (Pokémon)"],    ["wikipedia", "Moltres"]],
-  "poke-25": [["bulbapedia", "Alakazam (Pokémon)"],   ["wikipedia", "Alakazam"]],
-  "poke-26": [["bulbapedia", "Gengar (Pokémon)"],     ["wikipedia", "Gengar"]],
-  "poke-27": [["bulbapedia", "Machamp (Pokémon)"],    ["wikipedia", "Machamp"]],
-  "poke-28": [["bulbapedia", "Onix (Pokémon)"],       ["wikipedia", "Onix"]],
-  "poke-29": [["bulbapedia", "Ditto (Pokémon)"],      ["wikipedia", "Ditto (Pokémon)"]],
-  "poke-30": [["bulbapedia", "Arcanine (Pokémon)"],   ["wikipedia", "Arcanine"]],
+  // ---------- Pokémon Gen 1 — PokeAPI official artwork ----------
+  // PokeAPI hosts the official Game Freak artwork at a stable URL keyed by
+  // National Dex number. Tried first because Bulbapedia returns no
+  // pageimage and Wikipedia search misfires (Pikachu → toy, Mewtwo → JAL
+  // jumbo jet, Alakazam → cinema lobby).
+  "poke-01": [["url", POKEAPI_ART(1)]],
+  "poke-02": [["url", POKEAPI_ART(2)]],
+  "poke-03": [["url", POKEAPI_ART(3)]],
+  "poke-04": [["url", POKEAPI_ART(4)]],
+  "poke-05": [["url", POKEAPI_ART(5)]],
+  "poke-06": [["url", POKEAPI_ART(6)]],
+  "poke-07": [["url", POKEAPI_ART(7)]],
+  "poke-08": [["url", POKEAPI_ART(8)]],
+  "poke-09": [["url", POKEAPI_ART(9)]],
+  "poke-10": [["url", POKEAPI_ART(25)]],   // Pikachu
+  "poke-11": [["url", POKEAPI_ART(26)]],   // Raichu
+  "poke-12": [["url", POKEAPI_ART(150)]],  // Mewtwo
+  "poke-13": [["url", POKEAPI_ART(151)]],  // Mew
+  "poke-14": [["url", POKEAPI_ART(143)]],  // Snorlax
+  "poke-15": [["url", POKEAPI_ART(130)]],  // Gyarados
+  "poke-16": [["url", POKEAPI_ART(131)]],  // Lapras
+  "poke-17": [["url", POKEAPI_ART(149)]],  // Dragonite
+  "poke-18": [["url", POKEAPI_ART(133)]],  // Eevee
+  "poke-19": [["url", POKEAPI_ART(134)]],  // Vaporeon
+  "poke-20": [["url", POKEAPI_ART(135)]],  // Jolteon
+  "poke-21": [["url", POKEAPI_ART(136)]],  // Flareon
+  "poke-22": [["url", POKEAPI_ART(144)]],  // Articuno
+  "poke-23": [["url", POKEAPI_ART(145)]],  // Zapdos
+  "poke-24": [["url", POKEAPI_ART(146)]],  // Moltres
+  "poke-25": [["url", POKEAPI_ART(65)]],   // Alakazam
+  "poke-26": [["url", POKEAPI_ART(94)]],   // Gengar
+  "poke-27": [["url", POKEAPI_ART(68)]],   // Machamp
+  "poke-28": [["url", POKEAPI_ART(95)]],   // Onix
+  "poke-29": [["url", POKEAPI_ART(132)]],  // Ditto
+  "poke-30": [["url", POKEAPI_ART(59)]],   // Arcanine
 
   // ---------- SpongeBob — spongebob.fandom.com → Wikipedia ----------
   "sb-01": [["spongebob", "SpongeBob SquarePants (character)"], ["spongebob", "SpongeBob SquarePants"], ["wikipedia", "SpongeBob SquarePants (character)"]],
@@ -257,6 +275,31 @@ async function fetchJson(url) {
   return await r.json();
 }
 
+// Strict-title-match guard for search fallbacks. The query is the card's
+// first explicit-candidate title, e.g. "Onum Barr" or "Pikachu (Pokémon)".
+// We tokenise the query (strip parens, split on spaces / dashes / slashes,
+// drop tokens ≤ 2 chars) and only accept a result whose title contains
+// every remaining token (case-insensitive substring). Without this guard,
+// MediaWiki search happily returns articles that share one token —
+// "Onum Barr" → Rwandan township article, "Pikachu (Pokémon)" → the
+// virtual-pet toy, "Lord Stettin" → Victorian noble photo from Stettin
+// (the German city). With it, those mismatches fail strictly and the card
+// drops to deck-fallback (book cover / franchise logo / etc.).
+function tokenise(s) {
+  return s
+    .toLowerCase()
+    .replace(/[()'"]/g, "")
+    .split(/[\s/\-_,.:]+/)
+    .filter((t) => t.length > 2);
+}
+
+function titleMatchesQuery(title, query) {
+  const t = title.toLowerCase().replace(/[()'"]/g, "");
+  const tokens = tokenise(query);
+  if (!tokens.length) return false;
+  return tokens.every((tok) => t.includes(tok));
+}
+
 // 1+2: query a single article's pageimage on a given MediaWiki source.
 async function queryPageImage(sourceKey, title) {
   const src = SOURCES[sourceKey];
@@ -274,7 +317,8 @@ async function queryPageImage(sourceKey, title) {
 }
 
 // 3: search a MediaWiki source for any article matching the query, return
-// the first result that has a pageimage.
+// the first result that has a pageimage AND whose title matches the query
+// strictly (every ≥3-letter query token appears in the title).
 async function searchPageImage(sourceKey, query) {
   const src = SOURCES[sourceKey];
   if (!src) return null;
@@ -286,12 +330,16 @@ async function searchPageImage(sourceKey, query) {
   const pages = data.query?.pages || [];
   pages.sort((a, b) => (a.index ?? 999) - (b.index ?? 999));
   for (const p of pages) {
-    if (p.thumbnail?.source) return { title: p.title, url: p.thumbnail.source };
+    if (!p.thumbnail?.source) continue;
+    if (!titleMatchesQuery(p.title, query)) continue;
+    return { title: p.title, url: p.thumbnail.source };
   }
   return null;
 }
 
-// 4: search Wikimedia Commons for any image (namespace 6 = File:).
+// 4: search Wikimedia Commons for any image (namespace 6 = File:). Strict
+// title-match guard applied to the File: title so a photo whose filename
+// happens to share one query word isn't accepted.
 async function searchCommonsImage(query) {
   const url =
     `${COMMONS_BASE}/w/api.php?action=query&format=json&formatversion=2` +
@@ -306,6 +354,9 @@ async function searchCommonsImage(query) {
     const mime = (info.mime || "").toLowerCase();
     if (!mime.startsWith("image/")) continue;
     if (mime === "image/svg+xml" || mime === "image/gif") continue; // prefer bitmaps for cards
+    // Strip "File:" prefix and the extension before matching tokens.
+    const nameForMatch = (p.title || "").replace(/^File:/i, "").replace(/\.[a-z0-9]+$/i, "");
+    if (!titleMatchesQuery(nameForMatch, query)) continue;
     return { title: p.title, url: info.thumburl || info.url };
   }
   return null;
@@ -336,9 +387,14 @@ async function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 // Walk the full fallback chain for one card. Returns the first image
 // that downloads, or null if literally nothing in the chain worked.
 async function resolveCardImage(id, candidates, notes) {
-  // Step 1: explicit candidates, exact title each.
+  // Step 1: explicit candidates. "url" source means title is a direct image
+  // URL (PokeAPI etc.); everything else is a MediaWiki article lookup.
   for (const [sourceKey, title] of candidates) {
     try {
+      if (sourceKey === "url") {
+        const dl = await downloadImage(title, id);
+        return { via: "exact", sourceKey: "url", title, ...dl };
+      }
       const imgUrl = await queryPageImage(sourceKey, title);
       if (imgUrl) {
         const dl = await downloadImage(imgUrl, id);
@@ -351,40 +407,48 @@ async function resolveCardImage(id, candidates, notes) {
     await sleep(120);
   }
 
-  // Step 2+3: search on each candidate source (de-duped), then Wikipedia.
-  const tried = new Set();
-  const searchSources = [];
-  for (const [sourceKey] of candidates) {
-    if (!tried.has(sourceKey)) { tried.add(sourceKey); searchSources.push(sourceKey); }
-  }
-  if (!tried.has("wikipedia")) searchSources.push("wikipedia");
-  const query = candidates[0]?.[1] || id;
-  for (const sourceKey of searchSources) {
+  // Step 2+3+4: search MediaWiki sources, Wikipedia, then Commons —
+  // but only if the card has at least one searchable (non-"url") candidate
+  // to build a query from. Cards using direct PokeAPI URLs intentionally
+  // skip text-search fallback (no useful query exists) and drop straight
+  // to the deck-themed fallback if the URL fetch failed.
+  const mwCandidate = candidates.find(([k]) => k !== "url");
+  if (mwCandidate) {
+    const tried = new Set();
+    const searchSources = [];
+    for (const [sourceKey] of candidates) {
+      if (sourceKey === "url") continue;
+      if (!tried.has(sourceKey)) { tried.add(sourceKey); searchSources.push(sourceKey); }
+    }
+    if (!tried.has("wikipedia")) searchSources.push("wikipedia");
+    const query = mwCandidate[1];
+    for (const sourceKey of searchSources) {
+      try {
+        const hit = await searchPageImage(sourceKey, query);
+        if (hit) {
+          const dl = await downloadImage(hit.url, id);
+          return { via: "search", sourceKey, title: hit.title, ...dl };
+        }
+        notes.push(`search ${sourceKey} "${query}" no qualified result`);
+      } catch (err) {
+        notes.push(`search ${sourceKey} "${query}" ${err.message}`);
+      }
+      await sleep(120);
+    }
+
+    // Step 4: Wikimedia Commons.
     try {
-      const hit = await searchPageImage(sourceKey, query);
+      const hit = await searchCommonsImage(query);
       if (hit) {
         const dl = await downloadImage(hit.url, id);
-        return { via: "search", sourceKey, title: hit.title, ...dl };
+        return { via: "commons", sourceKey: "commons", title: hit.title, ...dl };
       }
-      notes.push(`search ${sourceKey} "${query}" no result`);
+      notes.push(`commons "${query}" no qualified result`);
     } catch (err) {
-      notes.push(`search ${sourceKey} "${query}" ${err.message}`);
+      notes.push(`commons "${query}" ${err.message}`);
     }
     await sleep(120);
   }
-
-  // Step 4: Wikimedia Commons.
-  try {
-    const hit = await searchCommonsImage(query);
-    if (hit) {
-      const dl = await downloadImage(hit.url, id);
-      return { via: "commons", sourceKey: "commons", title: hit.title, ...dl };
-    }
-    notes.push(`commons "${query}" no result`);
-  } catch (err) {
-    notes.push(`commons "${query}" ${err.message}`);
-  }
-  await sleep(120);
 
   // Step 5: deck-themed final fallback.
   const deck = deckOf(id);
