@@ -35,9 +35,11 @@ const OUT_DIR = path.join(ROOT, "public", "cards");
 const MANIFEST = path.join(ROOT, "src", "data", "card-art-manifest.json");
 
 const SOURCES = {
-  wookieepedia: { host: "starwars.fandom.com", base: "https://starwars.fandom.com" },
-  foundation:   { host: "foundation.fandom.com", base: "https://foundation.fandom.com" },
-  wikipedia:    { host: "en.wikipedia.org", base: "https://en.wikipedia.org" },
+  wookieepedia: { host: "starwars.fandom.com",        base: "https://starwars.fandom.com" },
+  foundation:   { host: "foundation.fandom.com",      base: "https://foundation.fandom.com" },
+  bulbapedia:   { host: "bulbapedia.bulbagarden.net", base: "https://bulbapedia.bulbagarden.net" },
+  spongebob:    { host: "spongebob.fandom.com",       base: "https://spongebob.fandom.com" },
+  wikipedia:    { host: "en.wikipedia.org",           base: "https://en.wikipedia.org" },
 };
 
 const COMMONS_BASE = "https://commons.wikimedia.org";
@@ -51,6 +53,8 @@ const DECK_FALLBACK = {
   sw:    ["wikipedia", "Star Wars"],                  // SW logo / hero art
   found: ["wikipedia", "Foundation (Asimov novel)"],  // first-book cover
   med:   ["wikipedia", "Medieval warfare"],           // period painting
+  poke:  ["wikipedia", "Pokémon"],                    // franchise logo
+  sb:    ["wikipedia", "SpongeBob SquarePants"],      // show logo
 };
 
 // (source, title) candidates per card. Beyond these, the script will
@@ -153,6 +157,71 @@ const CARDS = {
   "med-28": [["wikipedia", "Gallowglass"]],
   "med-29": [["wikipedia", "Rajput"]],
   "med-30": [["wikipedia", "Knights Hospitaller"]],
+
+  // ---------- Pokémon Gen 1 — Bulbapedia → Wikipedia ----------
+  // Bulbapedia article titles use "{Name} (Pokémon)".
+  "poke-01": [["bulbapedia", "Bulbasaur (Pokémon)"],  ["wikipedia", "Bulbasaur"]],
+  "poke-02": [["bulbapedia", "Ivysaur (Pokémon)"],    ["wikipedia", "Ivysaur"]],
+  "poke-03": [["bulbapedia", "Venusaur (Pokémon)"],   ["wikipedia", "Venusaur"]],
+  "poke-04": [["bulbapedia", "Charmander (Pokémon)"], ["wikipedia", "Charmander"]],
+  "poke-05": [["bulbapedia", "Charmeleon (Pokémon)"], ["wikipedia", "Charmeleon"]],
+  "poke-06": [["bulbapedia", "Charizard (Pokémon)"],  ["wikipedia", "Charizard"]],
+  "poke-07": [["bulbapedia", "Squirtle (Pokémon)"],   ["wikipedia", "Squirtle"]],
+  "poke-08": [["bulbapedia", "Wartortle (Pokémon)"],  ["wikipedia", "Wartortle"]],
+  "poke-09": [["bulbapedia", "Blastoise (Pokémon)"],  ["wikipedia", "Blastoise"]],
+  "poke-10": [["bulbapedia", "Pikachu (Pokémon)"],    ["wikipedia", "Pikachu"]],
+  "poke-11": [["bulbapedia", "Raichu (Pokémon)"],     ["wikipedia", "Raichu"]],
+  "poke-12": [["bulbapedia", "Mewtwo (Pokémon)"],     ["wikipedia", "Mewtwo"]],
+  "poke-13": [["bulbapedia", "Mew (Pokémon)"],        ["wikipedia", "Mew (Pokémon)"]],
+  "poke-14": [["bulbapedia", "Snorlax (Pokémon)"],    ["wikipedia", "Snorlax"]],
+  "poke-15": [["bulbapedia", "Gyarados (Pokémon)"],   ["wikipedia", "Gyarados"]],
+  "poke-16": [["bulbapedia", "Lapras (Pokémon)"],     ["wikipedia", "Lapras"]],
+  "poke-17": [["bulbapedia", "Dragonite (Pokémon)"],  ["wikipedia", "Dragonite"]],
+  "poke-18": [["bulbapedia", "Eevee (Pokémon)"],      ["wikipedia", "Eevee"]],
+  "poke-19": [["bulbapedia", "Vaporeon (Pokémon)"],   ["wikipedia", "Vaporeon"]],
+  "poke-20": [["bulbapedia", "Jolteon (Pokémon)"],    ["wikipedia", "Jolteon"]],
+  "poke-21": [["bulbapedia", "Flareon (Pokémon)"],    ["wikipedia", "Flareon"]],
+  "poke-22": [["bulbapedia", "Articuno (Pokémon)"],   ["wikipedia", "Articuno"]],
+  "poke-23": [["bulbapedia", "Zapdos (Pokémon)"],     ["wikipedia", "Zapdos"]],
+  "poke-24": [["bulbapedia", "Moltres (Pokémon)"],    ["wikipedia", "Moltres"]],
+  "poke-25": [["bulbapedia", "Alakazam (Pokémon)"],   ["wikipedia", "Alakazam"]],
+  "poke-26": [["bulbapedia", "Gengar (Pokémon)"],     ["wikipedia", "Gengar"]],
+  "poke-27": [["bulbapedia", "Machamp (Pokémon)"],    ["wikipedia", "Machamp"]],
+  "poke-28": [["bulbapedia", "Onix (Pokémon)"],       ["wikipedia", "Onix"]],
+  "poke-29": [["bulbapedia", "Ditto (Pokémon)"],      ["wikipedia", "Ditto (Pokémon)"]],
+  "poke-30": [["bulbapedia", "Arcanine (Pokémon)"],   ["wikipedia", "Arcanine"]],
+
+  // ---------- SpongeBob — spongebob.fandom.com → Wikipedia ----------
+  "sb-01": [["spongebob", "SpongeBob SquarePants (character)"], ["spongebob", "SpongeBob SquarePants"], ["wikipedia", "SpongeBob SquarePants (character)"]],
+  "sb-02": [["spongebob", "Patrick Star"],            ["wikipedia", "Patrick Star"]],
+  "sb-03": [["spongebob", "Squidward Tentacles"],     ["wikipedia", "Squidward Tentacles"]],
+  "sb-04": [["spongebob", "Eugene H. Krabs"],         ["spongebob", "Mr. Krabs"], ["wikipedia", "Mr. Krabs"]],
+  "sb-05": [["spongebob", "Sandy Cheeks"],            ["wikipedia", "Sandy Cheeks"]],
+  "sb-06": [["spongebob", "Sheldon J. Plankton"],     ["spongebob", "Plankton"], ["wikipedia", "Sheldon J. Plankton"]],
+  "sb-07": [["spongebob", "Gary the Snail"],          ["wikipedia", "Gary the Snail"]],
+  "sb-08": [["spongebob", "Pearl Krabs"],             ["wikipedia", "Pearl Krabs"]],
+  "sb-09": [["spongebob", "Mrs. Puff"],               ["wikipedia", "Mrs. Puff"]],
+  "sb-10": [["spongebob", "Karen Plankton"],          ["spongebob", "Karen"], ["wikipedia", "Karen Plankton"]],
+  "sb-11": [["spongebob", "Mermaid Man"],             ["wikipedia", "Mermaid Man and Barnacle Boy"]],
+  "sb-12": [["spongebob", "Barnacle Boy"],            ["wikipedia", "Mermaid Man and Barnacle Boy"]],
+  "sb-13": [["spongebob", "Squilliam Fancyson"]],
+  "sb-14": [["spongebob", "Larry the Lobster"]],
+  "sb-15": [["spongebob", "Bubble Bass"]],
+  "sb-16": [["spongebob", "Patchy the Pirate"]],
+  "sb-17": [["spongebob", "Flying Dutchman"], ["spongebob", "The Flying Dutchman"]],
+  "sb-18": [["spongebob", "King Neptune"]],
+  "sb-19": [["spongebob", "Princess Mindy"], ["spongebob", "Mindy"]],
+  "sb-20": [["spongebob", "DoodleBob"]],
+  "sb-21": [["spongebob", "Man Ray"]],
+  "sb-22": [["spongebob", "The Dirty Bubble"], ["spongebob", "Dirty Bubble"]],
+  "sb-23": [["spongebob", "Old Man Jenkins"]],
+  "sb-24": [["spongebob", "Bubble Buddy"]],
+  "sb-25": [["spongebob", "Hash-Slinging Slasher"], ["spongebob", "The Hash-Slinging Slasher"]],
+  "sb-26": [["spongebob", "Painty the Pirate"]],
+  "sb-27": [["spongebob", "Realistic Fish Head"]],
+  "sb-28": [["spongebob", "Atomic Flounder"], ["spongebob", "The Atomic Flounder"]],
+  "sb-29": [["spongebob", "Flats the Flounder"]],
+  "sb-30": [["spongebob", "Tom (fish)"], ["spongebob", "Tom"]],
 };
 
 const EXT_BY_MIME = {
@@ -257,6 +326,8 @@ function deckOf(id) {
   if (id.startsWith("sw-")) return "sw";
   if (id.startsWith("found-")) return "found";
   if (id.startsWith("med-")) return "med";
+  if (id.startsWith("poke-")) return "poke";
+  if (id.startsWith("sb-")) return "sb";
   return null;
 }
 

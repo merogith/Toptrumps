@@ -303,10 +303,161 @@ function buildMedievalDeck(): DeckTheme {
   };
 }
 
+/* ============================================================
+   POKÉMON GEN 1 DECK — 30 iconic Pokémon
+   Stats: HP · Attack · Defense · Sp. Atk · Sp. Def · Speed
+   Base stats use modern (post-split) values, identical to Bulbapedia.
+   ============================================================ */
+
+interface PokeRaw {
+  n: string; s: string; ic: string;
+  hp: number; at: number; df: number; sa: number; sd: number; sp: number;
+}
+
+const POKE_CARDS: PokeRaw[] = [
+  { n:"Bulbasaur",  s:"Seed Pokémon · Grass/Poison",       ic:"🌱", hp:45,  at:49,  df:49,  sa:65,  sd:65,  sp:45  },
+  { n:"Ivysaur",    s:"Seed Pokémon · Grass/Poison",       ic:"🌿", hp:60,  at:62,  df:63,  sa:80,  sd:80,  sp:60  },
+  { n:"Venusaur",   s:"Seed Pokémon · Grass/Poison",       ic:"🌺", hp:80,  at:82,  df:83,  sa:100, sd:100, sp:80  },
+  { n:"Charmander", s:"Lizard Pokémon · Fire",             ic:"🦎", hp:39,  at:52,  df:43,  sa:60,  sd:50,  sp:65  },
+  { n:"Charmeleon", s:"Flame Pokémon · Fire",              ic:"🔥", hp:58,  at:64,  df:58,  sa:80,  sd:65,  sp:80  },
+  { n:"Charizard",  s:"Flame Pokémon · Fire/Flying",       ic:"🐉", hp:78,  at:84,  df:78,  sa:109, sd:85,  sp:100 },
+  { n:"Squirtle",   s:"Tiny Turtle Pokémon · Water",       ic:"🐢", hp:44,  at:48,  df:65,  sa:50,  sd:64,  sp:43  },
+  { n:"Wartortle",  s:"Turtle Pokémon · Water",            ic:"💧", hp:59,  at:63,  df:80,  sa:65,  sd:80,  sp:58  },
+  { n:"Blastoise",  s:"Shellfish Pokémon · Water",         ic:"🌊", hp:79,  at:83,  df:100, sa:85,  sd:105, sp:78  },
+  { n:"Pikachu",    s:"Mouse Pokémon · Electric",          ic:"⚡", hp:35,  at:55,  df:40,  sa:50,  sd:50,  sp:90  },
+  { n:"Raichu",     s:"Mouse Pokémon · Electric",          ic:"🌩️", hp:60,  at:90,  df:55,  sa:90,  sd:80,  sp:110 },
+  { n:"Mewtwo",     s:"Genetic Pokémon · Psychic",         ic:"🧬", hp:106, at:110, df:90,  sa:154, sd:90,  sp:130 },
+  { n:"Mew",        s:"New Species Pokémon · Psychic",     ic:"✨", hp:100, at:100, df:100, sa:100, sd:100, sp:100 },
+  { n:"Snorlax",    s:"Sleeping Pokémon · Normal",         ic:"😴", hp:160, at:110, df:65,  sa:65,  sd:110, sp:30  },
+  { n:"Gyarados",   s:"Atrocious Pokémon · Water/Flying",  ic:"🐲", hp:95,  at:125, df:79,  sa:60,  sd:100, sp:81  },
+  { n:"Lapras",     s:"Transport Pokémon · Water/Ice",     ic:"🦕", hp:130, at:85,  df:80,  sa:85,  sd:95,  sp:60  },
+  { n:"Dragonite",  s:"Dragon Pokémon · Dragon/Flying",    ic:"🐉", hp:91,  at:134, df:95,  sa:100, sd:100, sp:80  },
+  { n:"Eevee",      s:"Evolution Pokémon · Normal",        ic:"🐾", hp:55,  at:55,  df:50,  sa:45,  sd:65,  sp:55  },
+  { n:"Vaporeon",   s:"Bubble Jet Pokémon · Water",        ic:"💦", hp:130, at:65,  df:60,  sa:110, sd:95,  sp:65  },
+  { n:"Jolteon",    s:"Lightning Pokémon · Electric",      ic:"⚡", hp:65,  at:65,  df:60,  sa:110, sd:95,  sp:130 },
+  { n:"Flareon",    s:"Flame Pokémon · Fire",              ic:"🔥", hp:65,  at:130, df:60,  sa:95,  sd:110, sp:65  },
+  { n:"Articuno",   s:"Freeze Pokémon · Ice/Flying",       ic:"❄️", hp:90,  at:85,  df:100, sa:95,  sd:125, sp:85  },
+  { n:"Zapdos",     s:"Electric Pokémon · Electric/Flying",ic:"⚡", hp:90,  at:90,  df:85,  sa:125, sd:90,  sp:100 },
+  { n:"Moltres",    s:"Flame Pokémon · Fire/Flying",       ic:"🔥", hp:90,  at:100, df:90,  sa:125, sd:85,  sp:90  },
+  { n:"Alakazam",   s:"Psi Pokémon · Psychic",             ic:"🥄", hp:55,  at:50,  df:45,  sa:135, sd:95,  sp:120 },
+  { n:"Gengar",     s:"Shadow Pokémon · Ghost/Poison",     ic:"👻", hp:60,  at:65,  df:60,  sa:130, sd:75,  sp:110 },
+  { n:"Machamp",    s:"Superpower Pokémon · Fighting",     ic:"💪", hp:90,  at:130, df:80,  sa:65,  sd:85,  sp:55  },
+  { n:"Onix",       s:"Rock Snake Pokémon · Rock/Ground",  ic:"🪨", hp:35,  at:45,  df:160, sa:30,  sd:45,  sp:70  },
+  { n:"Ditto",      s:"Transform Pokémon · Normal",        ic:"🟪", hp:48,  at:48,  df:48,  sa:48,  sd:48,  sp:48  },
+  { n:"Arcanine",   s:"Legendary Pokémon · Fire",          ic:"🐕", hp:90,  at:110, df:80,  sa:100, sd:80,  sp:95  },
+];
+
+function buildPokemonDeck(): DeckTheme {
+  const stats = [
+    { id:"hp",      label:"HP",          shortLabel:"HP",  higherIsBetter:true },
+    { id:"attack",  label:"Attack",      shortLabel:"ATK", higherIsBetter:true },
+    { id:"defense", label:"Defense",     shortLabel:"DEF", higherIsBetter:true },
+    { id:"spatk",   label:"Sp. Attack",  shortLabel:"SPA", higherIsBetter:true },
+    { id:"spdef",   label:"Sp. Defense", shortLabel:"SPD", higherIsBetter:true },
+    { id:"speed",   label:"Speed",       shortLabel:"SPE", higherIsBetter:true },
+  ];
+  const cards: Card[] = POKE_CARDS.map((c, i) => {
+    const id = `poke-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#facc15", "#1a1505", "#231c08", "#322710"),
+      stats: { hp:c.hp, attack:c.at, defense:c.df, spatk:c.sa, spdef:c.sd, speed:c.sp },
+    };
+  });
+  return {
+    id: "pokemon",
+    title: "Pokémon Gen 1",
+    tagline: "30 iconic Kanto Pokémon — base stats from the Pokédex",
+    description: "Compare HP, Attack, Defense, Sp. Atk, Sp. Def and Speed of the original 151.",
+    accent: "#facc15",
+    accentSoft: "rgba(250,204,21,0.15)",
+    stats,
+    cards,
+  };
+}
+
+/* ============================================================
+   SPONGEBOB DECK — 30 characters from Bikini Bottom and beyond
+   Stats: wackiness · strength · smarts · karma · fame · spirit
+   ============================================================ */
+
+interface SbRaw {
+  n: string; s: string; ic: string;
+  wk: number; st: number; sm: number; ka: number; fm: number; sr: number;
+}
+
+const SB_CARDS: SbRaw[] = [
+  { n:"SpongeBob SquarePants", s:"Fry cook, eternal optimist",            ic:"🧽", wk:95, st:35, sm:45, ka:92, fm:99, sr:99 },
+  { n:"Patrick Star",          s:"Pink starfish, Bikini Bottom philosopher", ic:"⭐", wk:99, st:70, sm: 8, ka:85, fm:95, sr:90 },
+  { n:"Squidward Tentacles",   s:"Reluctant cashier, clarinetist",         ic:"🦑", wk:30, st:30, sm:80, ka:35, fm:90, sr:60 },
+  { n:"Eugene H. Krabs",       s:"Owner of the Krusty Krab, money lover", ic:"🦀", wk:60, st:60, sm:75, ka:35, fm:85, sr:80 },
+  { n:"Sandy Cheeks",          s:"Texan squirrel scientist in a dome",     ic:"🐿️", wk:70, st:88, sm:95, ka:90, fm:78, sr:92 },
+  { n:"Sheldon J. Plankton",   s:"Chum Bucket owner, evil mastermind",     ic:"🦠", wk:80, st: 5, sm:99, ka:15, fm:75, sr:88 },
+  { n:"Gary the Snail",        s:"SpongeBob's pet, secretly very wise",    ic:"🐌", wk:40, st:25, sm:70, ka:88, fm:70, sr:75 },
+  { n:"Pearl Krabs",           s:"Teenage whale daughter of Mr. Krabs",    ic:"🐋", wk:60, st:80, sm:50, ka:65, fm:60, sr:70 },
+  { n:"Mrs. Puff",             s:"Long-suffering boating school teacher",  ic:"🐡", wk:40, st:30, sm:60, ka:75, fm:55, sr:65 },
+  { n:"Karen Plankton",        s:"Plankton's computer wife",               ic:"💻", wk:30, st:25, sm:99, ka:60, fm:65, sr:70 },
+  { n:"Mermaid Man",           s:"Retired superhero, lives in Shady Shoals", ic:"🦸", wk:70, st:60, sm:30, ka:90, fm:75, sr:85 },
+  { n:"Barnacle Boy",          s:"Mermaid Man's loyal sidekick",           ic:"🧒", wk:55, st:40, sm:50, ka:75, fm:60, sr:75 },
+  { n:"Squilliam Fancyson",    s:"Squidward's rich rival",                 ic:"🎩", wk:50, st:35, sm:70, ka:20, fm:60, sr:50 },
+  { n:"Larry the Lobster",     s:"Goofy Goober beach lifeguard",           ic:"🦞", wk:35, st:95, sm:50, ka:70, fm:55, sr:80 },
+  { n:"Bubble Bass",           s:"Sandwich-hiding internet villain",       ic:"🐟", wk:90, st:55, sm:60, ka:10, fm:50, sr:35 },
+  { n:"Patchy the Pirate",     s:"President of the SpongeBob Fan Club",    ic:"🏴‍☠️", wk:85, st:40, sm:30, ka:75, fm:55, sr:90 },
+  { n:"The Flying Dutchman",   s:"Ghostly pirate of the Seven Seas",       ic:"👻", wk:88, st:88, sm:70, ka:15, fm:75, sr:85 },
+  { n:"King Neptune",          s:"Ruler of the seas, trident in hand",     ic:"🔱", wk:65, st:95, sm:70, ka:60, fm:88, sr:80 },
+  { n:"Princess Mindy",        s:"Neptune's daughter, kind-hearted",       ic:"👸", wk:50, st:60, sm:75, ka:88, fm:50, sr:78 },
+  { n:"DoodleBob",             s:"Sketched menace from the magic pencil",  ic:"✏️", wk:95, st:70, sm:30, ka:10, fm:55, sr:50 },
+  { n:"Man Ray",               s:"Arch-enemy of Mermaid Man",              ic:"🦹", wk:60, st:85, sm:80, ka:20, fm:60, sr:70 },
+  { n:"The Dirty Bubble",      s:"Filthy floating supervillain",           ic:"🫧", wk:70, st:60, sm:40, ka: 5, fm:50, sr:55 },
+  { n:"Old Man Jenkins",       s:"Confused elder of Bikini Bottom",        ic:"👴", wk:80, st:25, sm:30, ka:70, fm:45, sr:60 },
+  { n:"Bubble Buddy",          s:"Imaginary friend made of soap",          ic:"🫧", wk:80, st: 5, sm:40, ka:90, fm:40, sr:60 },
+  { n:"Hash-Slinging Slasher", s:"Ghost story fry cook, legend of the Krab", ic:"🔪", wk:88, st:75, sm:35, ka: 5, fm:45, sr:65 },
+  { n:"Painty the Pirate",     s:"Singer of the opening theme",            ic:"🎤", wk:70, st:30, sm:40, ka:85, fm:60, sr:95 },
+  { n:"Realistic Fish Head",   s:"Bikini Bottom News anchor",              ic:"📺", wk:35, st:20, sm:60, ka:75, fm:70, sr:60 },
+  { n:"Atomic Flounder",       s:"Mermaid Man villain, glowing fins",      ic:"☢️", wk:65, st:75, sm:50, ka:15, fm:40, sr:55 },
+  { n:"Flats the Flounder",    s:"Boating school bully",                   ic:"🐟", wk:45, st:80, sm:25, ka:10, fm:35, sr:60 },
+  { n:"Tom",                   s:"Long-suffering background fish",         ic:"🐠", wk:50, st:30, sm:30, ka:70, fm:30, sr:65 },
+];
+
+function buildSpongebobDeck(): DeckTheme {
+  const stats = [
+    { id:"wackiness", label:"Wackiness", shortLabel:"WK", higherIsBetter:true },
+    { id:"strength",  label:"Strength",  shortLabel:"ST", higherIsBetter:true },
+    { id:"smarts",    label:"Smarts",    shortLabel:"SM", higherIsBetter:true },
+    { id:"karma",     label:"Karma",     shortLabel:"KA", higherIsBetter:true },
+    { id:"fame",      label:"Fame",      shortLabel:"FM", higherIsBetter:true },
+    { id:"spirit",    label:"Spirit",    shortLabel:"SR", higherIsBetter:true },
+  ];
+  const cards: Card[] = SB_CARDS.map((c, i) => {
+    const id = `sb-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#22d3ee", "#04141a", "#061b22", "#0a2731"),
+      stats: { wackiness:c.wk, strength:c.st, smarts:c.sm, karma:c.ka, fame:c.fm, spirit:c.sr },
+    };
+  });
+  return {
+    id: "spongebob",
+    title: "SpongeBob SquarePants",
+    tagline: "30 characters from Bikini Bottom — wackiness, strength, smarts and heart",
+    description: "Pit fry cooks, supervillains, pirates and snails against each other in the absorbant chaos of Bikini Bottom.",
+    accent: "#22d3ee",
+    accentSoft: "rgba(34,211,238,0.15)",
+    stats,
+    cards,
+  };
+}
+
 export const DECKS: DeckTheme[] = [
   buildStarWarsDeck(),
   buildFoundationDeck(),
   buildMedievalDeck(),
+  buildPokemonDeck(),
+  buildSpongebobDeck(),
 ];
 
 export function getDeckById(id: string): DeckTheme | undefined {

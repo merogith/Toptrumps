@@ -441,16 +441,18 @@ function renderHowToPlay(): HTMLElement {
    THEME PICKER
    ============================================================ */
 const DECK_ICONS: Record<string, string> = {
-  galactic: "🚀",
+  starwars: "🚀",
   foundation: "🔮",
   medieval: "⚔️",
+  pokemon: "⚡",
+  spongebob: "🧽",
 };
 
 function renderThemePick(): HTMLElement {
   const frag = el("div", "stack");
 
   const hdr = el("div");
-  hdr.innerHTML = `<h1>Pick a deck</h1><p>Three themes · 30 cards each · 6 stats · classic Top Trumps rules.</p>`;
+  hdr.innerHTML = `<h1>Pick a deck</h1><p>${DECKS.length} themes · 30 cards each · 6 stats · classic Top Trumps rules.</p>`;
   frag.appendChild(hdr);
 
   const grid = el("div", "theme-grid");
