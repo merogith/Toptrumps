@@ -115,27 +115,69 @@ main.stack { padding-top: 1.25rem; }
   gap: 1.1rem;
 }
 
-/* Mobile-friendly primary action bar.
-   Pins to the top of the viewport so the player never has to scroll
-   past tall card content to reach Next round / Reveal. */
-.cta-top {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  margin: -1.25rem -1rem 0;
-  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-top, 0px));
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: saturate(140%) blur(10px);
-  -webkit-backdrop-filter: saturate(140%) blur(10px);
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+/* Primary game actions (Reveal, Next round). On narrow viewports and
+   touch devices we lift the button out of normal flow and pin it to the
+   TOP of the viewport so the player never has to scroll past tall card
+   content. position: fixed is used instead of position: sticky because
+   sticky silently fails if any ancestor has overflow: hidden|auto, and
+   data-screen-scoped padding-top reserves space below the dock so the
+   HUD / result banner aren't hidden behind it. Desktop keeps normal flow. */
+.play-cta-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-.cta-top .btn {
+.play-cta-dock .btn {
   width: 100%;
   font-size: 1.05rem;
   padding: 0.95rem 1rem;
   min-height: 3.1rem;
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  main[data-screen="opponent_view"],
+  main[data-screen="round_result"] {
+    padding-top: calc(4.75rem + env(safe-area-inset-top, 0px));
+  }
+
+  .play-cta-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 100;
+    padding: calc(0.55rem + env(safe-area-inset-top, 0px)) 1rem 0.55rem;
+    background: color-mix(in srgb, var(--bg) 93%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  .play-cta-dock .btn {
+    width: 100%;
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .play-cta-dock {
+    position: static;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  main[data-screen="opponent_view"],
+  main[data-screen="round_result"] {
+    padding-top: 1.25rem;
+  }
 }
 
 .row {

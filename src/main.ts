@@ -813,7 +813,7 @@ function renderOpponentView(): HTMLElement {
 
   /* Sticky action bar at the top of the viewport so the player can
      tap Reveal without scrolling past the full card. */
-  const ctaBar = el("div", "cta-top");
+  const ctaBar = el("div", "play-cta-dock");
   const revealBtn = el("button", "btn btn-primary");
   revealBtn.type = "button";
   revealBtn.textContent = "Reveal round result";
@@ -866,7 +866,7 @@ function renderRoundResult(): HTMLElement {
 
   /* Sticky action bar at the top of the viewport so the player never has
      to scroll past two tall cards to reach the next-round button. */
-  const ctaBar = el("div", "cta-top");
+  const ctaBar = el("div", "play-cta-dock");
   const ctaBtn = el("button", "btn btn-primary");
   ctaBtn.type = "button";
   ctaBtn.textContent = matchFinished ? "Finish match" : "Next round →";
