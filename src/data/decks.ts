@@ -1,6 +1,14 @@
 import type { Card, DeckTheme } from "../types";
+import artManifest from "./card-art-manifest.json";
 
 const PLACEHOLDER_IMG = `${import.meta.env.BASE_URL}card-placeholder.svg`;
+
+const ART: Record<string, string> = artManifest as Record<string, string>;
+
+function artFor(id: string): string | undefined {
+  const rel = ART[id];
+  return rel ? `${import.meta.env.BASE_URL}${rel}` : undefined;
+}
 
 function makeSvg(
   icon: string,
@@ -69,13 +77,16 @@ function buildStarWarsDeck(): DeckTheme {
     { id:"length",     label:"Length index",     shortLabel:"LN", higherIsBetter:true },
     { id:"speed",      label:"Speed (MGLT)",     shortLabel:"SP", higherIsBetter:true },
   ];
-  const cards: Card[] = SW_CARDS.map((c, i) => ({
-    id: `sw-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#38bdf8", "#070d1a", "#0c1525", "#1a2a40"),
-    stats: { firepower:c.fp, shields:c.sh, hyperdrive:c.hy, crew:c.cr, length:c.ln, speed:c.sp },
-  }));
+  const cards: Card[] = SW_CARDS.map((c, i) => {
+    const id = `sw-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#38bdf8", "#070d1a", "#0c1525", "#1a2a40"),
+      stats: { firepower:c.fp, shields:c.sh, hyperdrive:c.hy, crew:c.cr, length:c.ln, speed:c.sp },
+    };
+  });
   return {
     id: "starwars",
     title: "Star Wars",
@@ -140,13 +151,16 @@ function buildFoundationDeck(): DeckTheme {
     { id:"resources",  label:"Resources",           shortLabel:"RS", higherIsBetter:true },
     { id:"legacy",     label:"Legacy",              shortLabel:"LG", higherIsBetter:true },
   ];
-  const cards: Card[] = FN_CARDS.map((c, i) => ({
-    id: `found-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#c084fc", "#0d0a1a", "#130d22", "#1e1535"),
-    stats: { intellect:c.in, influence:c.pi, foresight:c.fs, resilience:c.re, resources:c.rs, legacy:c.lg },
-  }));
+  const cards: Card[] = FN_CARDS.map((c, i) => {
+    const id = `found-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#c084fc", "#0d0a1a", "#130d22", "#1e1535"),
+      stats: { intellect:c.in, influence:c.pi, foresight:c.fs, resilience:c.re, resources:c.rs, legacy:c.lg },
+    };
+  });
   return {
     id: "foundation",
     title: "Foundation",
@@ -211,13 +225,16 @@ function buildMedievalDeck(): DeckTheme {
     { id:"equipment",  label:"Equipment",  shortLabel:"EQ", higherIsBetter:true },
     { id:"legacy",     label:"Legacy",     shortLabel:"LG", higherIsBetter:true },
   ];
-  const cards: Card[] = MED_CARDS.map((c, i) => ({
-    id: `med-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#f59e0b", "#1a1006", "#120c04", "#2a1e08"),
-    stats: { attack:c.at, defense:c.de, discipline:c.di, mobility:c.mb, equipment:c.eq, legacy:c.lg },
-  }));
+  const cards: Card[] = MED_CARDS.map((c, i) => {
+    const id = `med-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#f59e0b", "#1a1006", "#120c04", "#2a1e08"),
+      stats: { attack:c.at, defense:c.de, discipline:c.di, mobility:c.mb, equipment:c.eq, legacy:c.lg },
+    };
+  });
   return {
     id: "medieval",
     title: "Warriors of the Ages",
