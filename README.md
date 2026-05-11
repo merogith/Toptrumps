@@ -1,6 +1,6 @@
 # Local Top Trumps (2 players)
 
-Pass-and-play Top Trumps for two people on one device: **Galactic legends**, **Foundation & empire**, and **Warriors of the age** (30 cards each, six stats). Card images use `public/card-placeholder.svg` until you add artwork.
+Pass-and-play Top Trumps for two people on one device: **Galactic legends**, **Foundation & empire**, and **Warriors of the age** (30 cards each, six stats). Cards display a themed SVG out of the box; run `npm run fetch:cards` to pull real Wikipedia lead images for the cards that have a matching article (see [Card artwork](#card-artwork)).
 
 ## Run locally
 
@@ -67,6 +67,40 @@ Then open **http://localhost:4173/Toptrumps/** — app and assets should load un
 
 - **Blank page on GitHub** — In the repo: **Settings → Pages → Source: Deploy from a branch → main → `/docs`**. Wait for the workflow to finish; the site is **`https://<username>.github.io/Toptrumps/`**. Do not deploy the repo root as Pages unless you only serve the built **`docs/`** output.
 - **Blank locally** — Run `npm install`, then `npm run dev`, open the exact URL from the terminal. Check **Console** (F12); errors may also appear as a red panel on the page.
+
+## Card artwork
+
+Cards render the real subject's image — Star Wars ships from Wookieepedia, Foundation characters from the Foundation Fandom wiki, medieval warriors from Wikipedia — when those have been populated into `public/cards/`. If a card file is missing, `src/data/decks.ts` falls back to a themed SVG (halo + corner brackets + accent nameplate) and the `<img onerror>` in `src/main.ts` is a second safety net.
+
+### Populate the images
+
+```bash
+npm run fetch:cards
+```
+
+`scripts/fetch-card-art.mjs` (Node ≥18, no dependencies):
+
+- Reads a `cardId → [(source, article-title), …]` map at the top of the file. Sources are:
+  - `wookieepedia` → `starwars.fandom.com`
+  - `foundation`   → `foundation.fandom.com`
+  - `wikipedia`    → `en.wikipedia.org`
+- Calls each source's MediaWiki `api.php` (`prop=pageimages`, `pithumbsize=480`, `redirects=1`) until one returns a thumbnail.
+- Downloads to `public/cards/<cardId>.<ext>` and merges the relative path into `src/data/card-art-manifest.json` (existing entries are kept, so a partial run is safe).
+- Cards that strike out on every candidate keep the themed SVG fallback.
+
+CI does this automatically — see `.github/workflows/deploy-pages.yml`, which runs `npm run fetch:cards` before `npm run build:docs` on every push to `main` and commits both `docs/` and the freshly populated `public/cards/` back to the branch.
+
+### Fair-use notice — please read
+
+The Star Wars and *Foundation* article thumbnails on the Fandom wikis are uploaded there for editorial commentary under fair-use claims (low-resolution stills used in articles *about* the depicted subject). Using those same low-resolution thumbnails inside a personal, non-commercial Top Trumps deck is the same legal posture: educational / fan-game fair use. You should:
+
+- Keep this repository non-commercial (no ads, no paid distribution, no merchandise).
+- Not redistribute the populated `public/cards/` folder as a standalone image set.
+- Treat the deployed GitHub Pages site as a personal hobby project (Disney/Lucasfilm own Star Wars; Apple TV+ and the Asimov estate own *Foundation*).
+
+The medieval cards pull from English Wikipedia, where lead images are usually public-domain paintings, engravings, and woodcuts that can be reused freely.
+
+If you'd rather not host any third-party imagery, delete `public/cards/`, set `src/data/card-art-manifest.json` to `{}`, and remove the `fetch:cards` step from `.github/workflows/deploy-pages.yml`. The app will fall back to the themed SVG illustrations for every card.
 
 ## Rules
 

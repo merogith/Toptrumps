@@ -811,6 +811,23 @@ function renderOpponentView(): HTMLElement {
 
   frag.appendChild(renderHUD(game));
 
+  /* Sticky action bar at the top of the viewport so the player can
+     tap Reveal without scrolling past the full card. */
+  const ctaBar = el("div", "play-cta-dock");
+  const revealBtn = el("button", "btn btn-primary");
+  revealBtn.type = "button";
+  revealBtn.textContent = "Reveal round result";
+  revealBtn.addEventListener("click", () => {
+    game = revealAndResolve(game);
+    if (game.lastRound) {
+      if (game.lastRound.winner === "tie") announce("Draw — cards go to the centre pile.");
+      else announce(`${pLabel(game.lastRound.winner as PlayerId)} wins the trick.`);
+    }
+    render();
+  });
+  ctaBar.appendChild(revealBtn);
+  frag.appendChild(ctaBar);
+
   const chall = challenger(game);
   const banner = el("div", "player-banner");
   const dot = el("span", "banner-dot");
@@ -832,19 +849,6 @@ function renderOpponentView(): HTMLElement {
 
   frag.appendChild(renderCard(game.theme, card, { activeStatId: game.pendingStatId }));
 
-  const revealBtn = el("button", "btn btn-primary");
-  revealBtn.type = "button";
-  revealBtn.textContent = "Reveal round result";
-  revealBtn.addEventListener("click", () => {
-    game = revealAndResolve(game);
-    if (game.lastRound) {
-      if (game.lastRound.winner === "tie") announce("Draw — cards go to the centre pile.");
-      else announce(`${pLabel(game.lastRound.winner as PlayerId)} wins the trick.`);
-    }
-    render();
-  });
-  frag.appendChild(revealBtn);
-
   return frag;
 }
 
@@ -858,6 +862,23 @@ function renderRoundResult(): HTMLElement {
   const lr = game.lastRound;
   const isTie = lr.winner === "tie";
   const winnerPid = isTie ? null : (lr.winner as PlayerId);
+  const matchFinished = game.p1.length === 0 || game.p2.length === 0;
+
+  /* Sticky action bar at the top of the viewport so the player never has
+     to scroll past two tall cards to reach the next-round button. */
+  const ctaBar = el("div", "play-cta-dock");
+  const ctaBtn = el("button", "btn btn-primary");
+  ctaBtn.type = "button";
+  ctaBtn.textContent = matchFinished ? "Finish match" : "Next round →";
+  ctaBtn.addEventListener("click", () => {
+    game = continueAfterRound(game);
+    if (game.screen === "game_over") {
+      announce(game.winner ? `${playerLabel(game.winner, game)} wins the match!` : "Game over.");
+    }
+    render();
+  });
+  ctaBar.appendChild(ctaBtn);
+  frag.appendChild(ctaBar);
 
   /* Result banner */
   const banner = el("div", `result-banner ${isTie ? "is-tie" : "is-win"}`);
@@ -937,20 +958,6 @@ function renderRoundResult(): HTMLElement {
   if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
   scoreLine.textContent = scoreText;
   frag.appendChild(scoreLine);
-
-  const matchFinished = game.p1.length === 0 || game.p2.length === 0;
-
-  const nextBtn = el("button", "btn btn-primary");
-  nextBtn.type = "button";
-  nextBtn.textContent = matchFinished ? "Finish" : "Next round";
-  nextBtn.addEventListener("click", () => {
-    game = continueAfterRound(game);
-    if (game.screen === "game_over") {
-      announce(game.winner ? `${playerLabel(game.winner, game)} wins the match!` : "Game over.");
-    }
-    render();
-  });
-  frag.appendChild(nextBtn);
 
   const tb = el("div", "toolbar");
   const quit = el("button", "btn btn-danger btn-sm");

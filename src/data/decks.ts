@@ -1,6 +1,14 @@
 import type { Card, DeckTheme } from "../types";
+import artManifest from "./card-art-manifest.json";
 
 const PLACEHOLDER_IMG = `${import.meta.env.BASE_URL}card-placeholder.svg`;
+
+const ART: Record<string, string> = artManifest as Record<string, string>;
+
+function artFor(id: string): string | undefined {
+  const rel = ART[id];
+  return rel ? `${import.meta.env.BASE_URL}${rel}` : undefined;
+}
 
 function makeSvg(
   icon: string,
@@ -13,7 +21,63 @@ function makeSvg(
 ): string {
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${bg1}"/><stop offset="100%" stop-color="${bg2}"/></linearGradient><pattern id="gr" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="${pc}" stroke-width="0.5"/></pattern></defs><rect width="320" height="200" fill="url(#bg)"/><rect width="320" height="200" fill="url(#gr)"/><circle cx="160" cy="85" r="52" fill="${accent}" opacity="0.12"/><text x="160" y="92" text-anchor="middle" dominant-baseline="middle" font-size="50" font-family="system-ui,sans-serif">${icon}</text><text x="160" y="150" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="${accent}">${esc(name)}</text><text x="160" y="169" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="${pc}" letter-spacing="1">${esc(subtitle.toUpperCase())}</text></svg>`;
+
+  // Wrap long names onto two centred lines so the placeholder doesn't clip.
+  const NAME_BREAK = 22;
+  let line1 = esc(name);
+  let line2 = "";
+  if (name.length > NAME_BREAK) {
+    const cut = name.lastIndexOf(" ", NAME_BREAK);
+    const at = cut > 8 ? cut : NAME_BREAK;
+    line1 = esc(name.slice(0, at));
+    line2 = esc(name.slice(at).trim());
+  }
+  const sub = esc(subtitle.length > 38 ? subtitle.slice(0, 35).trimEnd() + "…" : subtitle).toUpperCase();
+  const iconSafe = esc(icon);
+  const emojiFam = "system-ui,'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif";
+  const uiFam = "system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">` +
+    `<defs>` +
+      `<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">` +
+        `<stop offset="0%" stop-color="${bg1}"/>` +
+        `<stop offset="100%" stop-color="${bg2}"/>` +
+      `</linearGradient>` +
+      `<radialGradient id="halo" cx="50%" cy="38%" r="55%">` +
+        `<stop offset="0%" stop-color="${accent}" stop-opacity="0.32"/>` +
+        `<stop offset="55%" stop-color="${accent}" stop-opacity="0.06"/>` +
+        `<stop offset="100%" stop-color="${bg1}" stop-opacity="0"/>` +
+      `</radialGradient>` +
+      `<pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">` +
+        `<circle cx="7" cy="7" r="0.7" fill="${pc}" opacity="0.55"/>` +
+      `</pattern>` +
+    `</defs>` +
+    `<rect width="320" height="200" fill="url(#bg)"/>` +
+    `<rect width="320" height="200" fill="url(#dots)"/>` +
+    `<rect width="320" height="200" fill="url(#halo)"/>` +
+    // Decorative corner brackets
+    `<g stroke="${accent}" stroke-width="1.5" fill="none" opacity="0.55">` +
+      `<path d="M 10 24 L 10 10 L 24 10"/>` +
+      `<path d="M 310 24 L 310 10 L 296 10"/>` +
+      `<path d="M 10 176 L 10 190 L 24 190"/>` +
+      `<path d="M 310 176 L 310 190 L 296 190"/>` +
+    `</g>` +
+    // Icon halos
+    `<circle cx="160" cy="78" r="60" fill="${accent}" opacity="0.10"/>` +
+    `<circle cx="160" cy="78" r="44" fill="none" stroke="${accent}" stroke-width="1.4" opacity="0.50"/>` +
+    // Big icon
+    `<text x="160" y="92" text-anchor="middle" dominant-baseline="middle" font-size="58" font-family="${emojiFam}">${iconSafe}</text>` +
+    // Accent underline
+    `<rect x="40" y="146" width="240" height="1" fill="${accent}" opacity="0.55"/>` +
+    // Name (1 or 2 lines)
+    (line2
+      ? `<text x="160" y="163" text-anchor="middle" font-family="${uiFam}" font-size="12.5" font-weight="800" fill="${accent}">${line1}</text>` +
+        `<text x="160" y="178" text-anchor="middle" font-family="${uiFam}" font-size="12.5" font-weight="800" fill="${accent}">${line2}</text>` +
+        `<text x="160" y="192" text-anchor="middle" font-family="${uiFam}" font-size="8" letter-spacing="1.2" fill="${pc}">${sub}</text>`
+      : `<text x="160" y="167" text-anchor="middle" font-family="${uiFam}" font-size="14" font-weight="800" fill="${accent}">${line1}</text>` +
+        `<text x="160" y="184" text-anchor="middle" font-family="${uiFam}" font-size="8.5" letter-spacing="1.2" fill="${pc}">${sub}</text>`) +
+    `</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
@@ -69,13 +133,16 @@ function buildStarWarsDeck(): DeckTheme {
     { id:"length",     label:"Length index",     shortLabel:"LN", higherIsBetter:true },
     { id:"speed",      label:"Speed (MGLT)",     shortLabel:"SP", higherIsBetter:true },
   ];
-  const cards: Card[] = SW_CARDS.map((c, i) => ({
-    id: `sw-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#38bdf8", "#070d1a", "#0c1525", "#1a2a40"),
-    stats: { firepower:c.fp, shields:c.sh, hyperdrive:c.hy, crew:c.cr, length:c.ln, speed:c.sp },
-  }));
+  const cards: Card[] = SW_CARDS.map((c, i) => {
+    const id = `sw-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#38bdf8", "#070d1a", "#0c1525", "#1a2a40"),
+      stats: { firepower:c.fp, shields:c.sh, hyperdrive:c.hy, crew:c.cr, length:c.ln, speed:c.sp },
+    };
+  });
   return {
     id: "starwars",
     title: "Star Wars",
@@ -140,13 +207,16 @@ function buildFoundationDeck(): DeckTheme {
     { id:"resources",  label:"Resources",           shortLabel:"RS", higherIsBetter:true },
     { id:"legacy",     label:"Legacy",              shortLabel:"LG", higherIsBetter:true },
   ];
-  const cards: Card[] = FN_CARDS.map((c, i) => ({
-    id: `found-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#c084fc", "#0d0a1a", "#130d22", "#1e1535"),
-    stats: { intellect:c.in, influence:c.pi, foresight:c.fs, resilience:c.re, resources:c.rs, legacy:c.lg },
-  }));
+  const cards: Card[] = FN_CARDS.map((c, i) => {
+    const id = `found-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#c084fc", "#0d0a1a", "#130d22", "#1e1535"),
+      stats: { intellect:c.in, influence:c.pi, foresight:c.fs, resilience:c.re, resources:c.rs, legacy:c.lg },
+    };
+  });
   return {
     id: "foundation",
     title: "Foundation",
@@ -211,13 +281,16 @@ function buildMedievalDeck(): DeckTheme {
     { id:"equipment",  label:"Equipment",  shortLabel:"EQ", higherIsBetter:true },
     { id:"legacy",     label:"Legacy",     shortLabel:"LG", higherIsBetter:true },
   ];
-  const cards: Card[] = MED_CARDS.map((c, i) => ({
-    id: `med-${String(i + 1).padStart(2, "0")}`,
-    name: c.n,
-    subtitle: c.s,
-    image: makeSvg(c.ic, c.n, c.s, "#f59e0b", "#1a1006", "#120c04", "#2a1e08"),
-    stats: { attack:c.at, defense:c.de, discipline:c.di, mobility:c.mb, equipment:c.eq, legacy:c.lg },
-  }));
+  const cards: Card[] = MED_CARDS.map((c, i) => {
+    const id = `med-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#f59e0b", "#1a1006", "#120c04", "#2a1e08"),
+      stats: { attack:c.at, defense:c.de, discipline:c.di, mobility:c.mb, equipment:c.eq, legacy:c.lg },
+    };
+  });
   return {
     id: "medieval",
     title: "Warriors of the Ages",
