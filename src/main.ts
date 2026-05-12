@@ -208,6 +208,7 @@ function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = {}): HT
   img.src = card.image ?? cardImageUrl(theme.id, card.id);
   img.alt = "";
   img.decoding = "async";
+  if (card.imageFocus) img.style.objectPosition = card.imageFocus;
   img.onerror = () => { img.src = cardImageUrl(theme.id, card.id); };
   imgWrap.appendChild(img);
   wrap.appendChild(imgWrap);
@@ -858,6 +859,56 @@ function renderOpponentView(): HTMLElement {
 /* ============================================================
    ROUND RESULT
    ============================================================ */
+
+/** True if user prefers reduced motion. Honoured by reveal animations. */
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined"
+    && window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** Animate a number from 0 to `to` over `duration` ms. No-op under reduced motion. */
+function animateCount(node: HTMLElement, to: number, duration = 650): void {
+  if (prefersReducedMotion()) { node.textContent = String(to); return; }
+  const start = performance.now();
+  const from = 0;
+  const tick = (now: number) => {
+    const t = Math.min(1, (now - start) / duration);
+    /* easeOutCubic */
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = Math.round(from + (to - from) * eased);
+    node.textContent = String(v);
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/** Soft haptic feedback. Silently no-ops where unsupported. */
+function haptic(pattern: number | number[]): void {
+  try {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      navigator.vibrate(pattern);
+    }
+  } catch { /* ignore */ }
+}
+
+/** Bot's reaction line based on outcome and margin. Only used in bot mode. */
+function botReactionLine(g: GameSnapshot, winner: PlayerId | "tie", margin: number): string {
+  if (!g.bot) return "";
+  const botWon = winner === g.bot.player;
+  const youWon = winner !== "tie" && winner !== g.bot.player;
+  const big = margin >= 40;
+  const close = margin > 0 && margin <= 8;
+  if (winner === "tie") return "Bot: \"A perfect draw. Curious.\"";
+  if (youWon && big)   return "Bot: \"…that wasn't even close.\"";
+  if (youWon && close) return "Bot: \"Lucky pick. I'll remember that one.\"";
+  if (youWon)          return "Bot: \"Well played. Next round.\"";
+  if (botWon && big)   return "Bot: \"Outclassed. Better luck next round.\"";
+  if (botWon && close) return "Bot: \"Squeaked that one out.\"";
+  if (botWon)          return "Bot: \"My round.\"";
+  return "";
+}
+
 function renderRoundResult(): HTMLElement {
   const frag = el("div", "stack");
   if (!game.theme || !game.lastRound) return frag;
@@ -866,6 +917,18 @@ function renderRoundResult(): HTMLElement {
   const isTie = lr.winner === "tie";
   const winnerPid = isTie ? null : (lr.winner as PlayerId);
   const matchFinished = game.p1.length === 0 || game.p2.length === 0;
+  const margin = Math.abs(lr.p1Value - lr.p2Value);
+
+  /* Haptic on mount — short = lose/tie, success pattern = win.
+     Only fire when there's a human in the seat (bot mode or 2P).  */
+  const userWon = game.bot
+    ? winnerPid !== null && winnerPid !== game.bot.player
+    : false;
+  if (game.bot) {
+    if (isTie) haptic(40);
+    else if (userWon) haptic([20, 60, 30, 60, 80]);
+    else haptic([80, 80, 20]);
+  }
 
   /* Sticky action bar at the top of the viewport so the player never has
      to scroll past two tall cards to reach the next-round button. */
@@ -884,7 +947,7 @@ function renderRoundResult(): HTMLElement {
   frag.appendChild(ctaBar);
 
   /* Result banner */
-  const banner = el("div", `result-banner ${isTie ? "is-tie" : "is-win"}`);
+  const banner = el("div", `result-banner reveal-pop ${isTie ? "is-tie" : "is-win"}`);
 
   const icon = el("div", "result-icon");
   icon.setAttribute("aria-hidden", "true");
@@ -895,39 +958,72 @@ function renderRoundResult(): HTMLElement {
 
   const statLine = el("p", "result-stat-line");
   statLine.innerHTML = `<strong>${escapeHtml(lr.statLabel)}</strong> · ${lr.higherIsBetter ? "higher wins" : "lower wins"}`;
+  banner.append(icon, headline, statLine);
   if (isTie) {
     const extra = el("p", "result-stat-line");
     extra.textContent = `${game.kitty.length} card${game.kitty.length !== 1 ? "s" : ""} go to the centre pile.`;
-    banner.append(icon, headline, statLine, extra);
-  } else {
-    banner.append(icon, headline, statLine);
+    banner.append(extra);
   }
   frag.appendChild(banner);
 
-  /* Stat comparison strip */
-  const cmp = el("div", "stat-compare");
+  /* Bot reaction quip (bot mode only, gives the bot personality) */
+  if (game.bot) {
+    const quipText = botReactionLine(game, lr.winner, margin);
+    if (quipText) {
+      const quip = el("p", "bot-quip reveal-fade");
+      quip.textContent = quipText;
+      frag.appendChild(quip);
+    }
+  }
+
+  /* Big stat-first VS comparison with animated count-up */
+  const cmp = el("div", "stat-compare big reveal-pop");
 
   const p1side = el("div", "sc-player");
   const p1lbl = el("div", "sc-label");
   p1lbl.textContent = playerLabel(1, game);
   const p1val = el("div", `sc-value${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  p1val.textContent = String(lr.p1Value);
+  p1val.textContent = "0";
   p1side.append(p1lbl, p1val);
 
   const divider = el("div", "sc-divider");
-  divider.innerHTML = `${escapeHtml(lr.statLabel)}<br>vs`;
+  divider.innerHTML = `${escapeHtml(lr.statLabel)}<br><span class="sc-vs">VS</span>`;
 
   const p2side = el("div", "sc-player");
   const p2lbl = el("div", "sc-label");
   p2lbl.textContent = playerLabel(2, game);
   const p2val = el("div", `sc-value${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  p2val.textContent = String(lr.p2Value);
+  p2val.textContent = "0";
   p2side.append(p2lbl, p2val);
 
   cmp.append(p1side, divider, p2side);
   frag.appendChild(cmp);
 
-  /* Both cards side by side */
+  /* Trigger count-up after the element mounts. */
+  queueMicrotask(() => {
+    animateCount(p1val, lr.p1Value);
+    animateCount(p2val, lr.p2Value);
+  });
+
+  /* Card count strip */
+  const scoreLine = el("p", "score-line");
+  let scoreText = `Cards — ${playerLabel(1, game)}: ${game.p1.length} · ${playerLabel(2, game)}: ${game.p2.length}`;
+  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
+  scoreLine.textContent = scoreText;
+  frag.appendChild(scoreLine);
+
+  /* Collapsible full-card view. <details> works without JS, is keyboard
+     accessible, and on desktop we force it open via CSS so power users
+     always see both cards. */
+  const details = document.createElement("details");
+  details.className = "compare-details";
+  /* Open by default on desktop via CSS; closed on mobile. We don't set
+     `open` here so mobile stays collapsed. */
+  const summary = document.createElement("summary");
+  summary.className = "compare-summary";
+  summary.innerHTML = `<span class="cd-chevron" aria-hidden="true">▾</span><span>See both cards</span>`;
+  details.appendChild(summary);
+
   const grid = el("div", "compare-grid two");
 
   const wrap1 = el("div", "compare-player");
@@ -951,16 +1047,8 @@ function renderRoundResult(): HTMLElement {
   }));
 
   grid.append(wrap1, wrap2);
-  frag.appendChild(grid);
-
-  /* Card count */
-  const scoreLine = el("p");
-  scoreLine.style.textAlign = "center";
-  scoreLine.style.fontSize = "0.85rem";
-  let scoreText = `Cards remaining — ${pLabel(1)}: ${game.p1.length} · ${pLabel(2)}: ${game.p2.length}`;
-  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
-  scoreLine.textContent = scoreText;
-  frag.appendChild(scoreLine);
+  details.appendChild(grid);
+  frag.appendChild(details);
 
   const tb = el("div", "toolbar");
   const quit = el("button", "btn btn-danger btn-sm");
