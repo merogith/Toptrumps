@@ -47,6 +47,8 @@ const SOURCES = {
   foundation:   { host: "foundation.fandom.com",      base: "https://foundation.fandom.com" },
   bulbapedia:   { host: "bulbapedia.bulbagarden.net", base: "https://bulbapedia.bulbagarden.net" },
   spongebob:    { host: "spongebob.fandom.com",       base: "https://spongebob.fandom.com" },
+  behzatc:      { host: "behzatc.fandom.com",         base: "https://behzatc.fandom.com" },
+  trwiki:       { host: "tr.wikipedia.org",           base: "https://tr.wikipedia.org" },
   wikipedia:    { host: "en.wikipedia.org",           base: "https://en.wikipedia.org" },
 };
 
@@ -58,11 +60,12 @@ const UA =
 // Thematic last-resort image per deck — guaranteed to exist on Wikipedia,
 // so even an obscure card lands on something visually on-brand.
 const DECK_FALLBACK = {
-  sw:    ["wikipedia", "Star Wars"],                  // SW logo / hero art
-  found: ["wikipedia", "Foundation (Asimov novel)"],  // first-book cover
-  med:   ["wikipedia", "Medieval warfare"],           // period painting
-  poke:  ["wikipedia", "Pokémon"],                    // franchise logo
-  sb:    ["wikipedia", "SpongeBob SquarePants"],      // show logo
+  sw:    ["wikipedia", "Star Wars"],                       // SW logo / hero art
+  found: ["wikipedia", "Foundation (Asimov novel)"],       // first-book cover
+  med:   ["wikipedia", "Medieval warfare"],                // period painting
+  poke:  ["wikipedia", "Pokémon"],                         // franchise logo
+  sb:    ["wikipedia", "SpongeBob SquarePants"],           // show logo
+  bz:    ["trwiki",    "Behzat Ç. Bir Ankara Polisiyesi"], // show poster
 };
 
 // PokeAPI hosts official Game Freak artwork at a stable URL pattern keyed by
@@ -240,6 +243,49 @@ const CARDS = {
   "sb-28": [["spongebob", "Atomic Flounder"], ["spongebob", "The Atomic Flounder"]],
   "sb-29": [["spongebob", "Flats the Flounder"]],
   "sb-30": [["spongebob", "Tom (fish)"], ["spongebob", "Tom"]],
+
+  // ---------- Behzat Ç. — behzatc.fandom.com → tr.wikipedia.org ----------
+  // Era variants of the same character point to different per-season /
+  // per-film articles so the squad lineup shows visual variety. The
+  // strict-title-match guard from PR #7 keeps Wikipedia/Commons search
+  // from grabbing unrelated photos for Turkish-name lookups.
+  /* Behzat — 6 era variants */
+  "bz-01": [["behzatc", "Behzat Çakırbey"],                       ["trwiki", "Behzat Ç. (karakter)"]],
+  "bz-02": [["behzatc", "Behzat Ç. Bir Ankara Polisiyesi"],       ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi"]],
+  "bz-03": [["behzatc", "Behzat Ç. Seni Kalbime Gömdüm"],         ["trwiki", "Behzat Ç. Seni Kalbime Gömdüm"]],
+  "bz-04": [["behzatc", "Behzat Ç. Ankara Yanıyor"],              ["trwiki", "Behzat Ç. Ankara Yanıyor"]],
+  "bz-05": [["behzatc", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"], ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"]],
+  "bz-06": [["behzatc", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"],  ["trwiki", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"]],
+  /* Harun — 4 era variants */
+  "bz-07": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
+  "bz-08": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
+  "bz-09": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
+  "bz-10": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
+  /* Hayalet — 3 era variants */
+  "bz-11": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
+  "bz-12": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
+  "bz-13": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
+  /* Akbaba — 3 era variants */
+  "bz-14": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
+  "bz-15": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
+  "bz-16": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
+  /* Eda — 2 era variants */
+  "bz-17": [["behzatc", "Eda Akkaya"],                            ["trwiki", "Seda Bakan"]],
+  "bz-18": [["behzatc", "Eda Akkaya"],                            ["trwiki", "Seda Bakan"]],
+  /* Esra — 3 era variants */
+  "bz-19": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
+  "bz-20": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
+  "bz-21": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
+  /* Supporting + villains */
+  "bz-22": [["behzatc", "Şevket Çakırbey"],                       ["trwiki", "Ege Aydan"]],
+  "bz-23": [["behzatc", "Cevdet"]],
+  "bz-24": [["behzatc", "Selim"],                                  ["behzatc", "Çabuk Selim"]],
+  "bz-25": [["behzatc", "Tahsin Yılmaz"],                         ["trwiki", "Eray Eserol"]],
+  "bz-26": [["behzatc", "Ercüment Çözer"]],
+  "bz-27": [["behzatc", "Memduh Başgan"]],
+  "bz-28": [["behzatc", "Şule"]],
+  "bz-29": [["behzatc", "Berna Çakırbey"]],
+  "bz-30": [["behzatc", "Mürsel"],                                 ["behzatc", "Mürsel Ateş"], ["behzatc", "Ateş"]],
 };
 
 const EXT_BY_MIME = {
@@ -379,6 +425,7 @@ function deckOf(id) {
   if (id.startsWith("med-")) return "med";
   if (id.startsWith("poke-")) return "poke";
   if (id.startsWith("sb-")) return "sb";
+  if (id.startsWith("bz-")) return "bz";
   return null;
 }
 
