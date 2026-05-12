@@ -3,8 +3,8 @@ import { DECKS } from "./decks";
 import { validateDeck } from "../engine";
 
 describe("DECKS data", () => {
-  it("exposes five themes with 30 cards and six stats each", () => {
-    expect(DECKS).toHaveLength(5);
+  it("exposes six themes with 30 cards and six stats each", () => {
+    expect(DECKS).toHaveLength(6);
     for (const d of DECKS) {
       expect(d.cards).toHaveLength(30);
       expect(d.stats).toHaveLength(6);
@@ -15,7 +15,7 @@ describe("DECKS data", () => {
 
   it("has unique theme ids", () => {
     const ids = DECKS.map((d) => d.id);
-    expect(new Set(ids).size).toBe(5);
+    expect(new Set(ids).size).toBe(6);
   });
 
   it("passes engine validateDeck for every theme", () => {

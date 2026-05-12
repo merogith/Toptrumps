@@ -452,12 +452,97 @@ function buildSpongebobDeck(): DeckTheme {
   };
 }
 
+/* ============================================================
+   BEHZAT Ç. DECK — 30 characters across the show's eras
+   Series timeline:
+     S1 (2010-11), S2-3 (2011-13), Seni Kalbime Gömdüm film (2011),
+     Ankara Yanıyor film (2013), S4 BluTV (2019), Çekiç ve Gül (2022-25).
+   Stats: Cesaret · Sertlik · Sezgi · İçki · Karizma · Sadakat
+   ============================================================ */
+
+interface BzRaw {
+  n: string; s: string; ic: string;
+  cs: number; st: number; sz: number; ik: number; kr: number; sd: number;
+}
+
+const BZ_CARDS: BzRaw[] = [
+  /* Behzat Çakırbey — 6 era variants */
+  { n:"Yas Tutan Behzat",       s:"Berna sonrası öfke ve raki — Sezon 1",                  ic:"🥃", cs:92, st:95, sz:78, ik:99, kr:88, sd:88 },
+  { n:"Komiser Behzat",         s:"Zirvedeki Cinayet Büro Amiri — Sezon 2-3",              ic:"🚓", cs:95, st:92, sz:92, ik:95, kr:95, sd:95 },
+  { n:"Sinemaskop Behzat",      s:"Sinema versiyonu — Seni Kalbime Gömdüm",                ic:"🎬", cs:92, st:90, sz:88, ik:95, kr:92, sd:92 },
+  { n:"Ankara Yanıyor Behzat",  s:"Tahsin'in çağrısıyla dönüş — 2013 film",                ic:"🔥", cs:94, st:92, sz:90, ik:90, kr:90, sd:90 },
+  { n:"Sürgün Behzat",          s:"6 yıl köyde, Esra halüsinasyonu — Sezon 4",             ic:"🌾", cs:80, st:75, sz:92, ik:92, kr:78, sd:88 },
+  { n:"Yaşlı Çakırbey",         s:"Daha bilge, daha karanlık — Çekiç ve Gül",              ic:"🌑", cs:78, st:70, sz:96, ik:88, kr:90, sd:95 },
+  /* Harun Sinanoğlu — 4 era variants */
+  { n:"Acemi Harun",            s:"\"Seviyorum merkez!\" — Sezon 1",                       ic:"📻", cs:65, st:50, sz:60, ik:75, kr:88, sd:90 },
+  { n:"Aşık Harun",              s:"Eda ile aşk, ekibin kalbi — Sezon 2-3",                 ic:"💘", cs:82, st:65, sz:78, ik:85, kr:92, sd:95 },
+  { n:"Ankara Yanıyor Harun",   s:"Behzat'sız direnen komiser — 2013 film",                ic:"🛡️", cs:85, st:70, sz:80, ik:80, kr:88, sd:95 },
+  { n:"Olgun Harun",            s:"Evli, sakin, deneyimli — Sezon 4",                       ic:"💍", cs:80, st:68, sz:82, ik:75, kr:85, sd:96 },
+  /* Hayalet — 3 era variants */
+  { n:"Yeni Hayalet",           s:"Sessiz gözlemci dedektif — Sezon 1",                    ic:"👻", cs:72, st:78, sz:85, ik:75, kr:55, sd:85 },
+  { n:"Hayalet Komiser",        s:"Kara mizah ustası, Akbaba'nın çiftliği — Sezon 2-3",   ic:"🌫️", cs:82, st:82, sz:95, ik:82, kr:65, sd:90 },
+  { n:"Yaşlı Hayalet",          s:"Yıllar olgunlaştırdı — Çekiç ve Gül",                   ic:"🪦", cs:78, st:78, sz:96, ik:78, kr:70, sd:92 },
+  /* Akbaba — 3 era variants */
+  { n:"Akbaba (S1)",            s:"Yaşlı dedektif, ilk işaretler — Sezon 1",               ic:"🦅", cs:65, st:70, sz:85, ik:92, kr:65, sd:85 },
+  { n:"Bilge Akbaba",           s:"Meyhane filozofu, sezginin atası — Sezon 2-3",         ic:"🍶", cs:72, st:78, sz:95, ik:95, kr:75, sd:92 },
+  { n:"Son Tüfek Akbaba",       s:"Yıllar geçirmiş ekibin kayası — Sezon 4",               ic:"🗿", cs:70, st:75, sz:96, ik:92, kr:78, sd:95 },
+  /* Eda Akkaya — 2 era variants */
+  { n:"Memur Eda",              s:"Yeni gelen kadın polis — Sezon 1",                      ic:"🌷", cs:78, st:65, sz:72, ik:55, kr:80, sd:88 },
+  { n:"Komiser Eda",            s:"Sert, zeki, ekibin tek kadını — Sezon 2-3",            ic:"🌹", cs:92, st:82, sz:85, ik:70, kr:88, sd:95 },
+  /* Savcı Esra — 3 era variants */
+  { n:"Savcı Esra",             s:"Soğuk mesafeli Cumhuriyet Savcısı — Sezon 1",          ic:"⚖️", cs:78, st:60, sz:88, ik:60, kr:82, sd:85 },
+  { n:"Aşık Esra",              s:"Behzat ile aşk, savcılık gerilimi — Sezon 2-3",        ic:"💔", cs:88, st:65, sz:92, ik:75, kr:95, sd:90 },
+  { n:"Hayalet Esra",           s:"Behzat'ın hallüsinasyonunda dönen sevgili — Sezon 4",  ic:"🌙", cs:70, st:50, sz:99, ik:30, kr:92, sd:95 },
+  /* Family, squad supporting cast, antagonists */
+  { n:"Şevket Çakırbey",        s:"Sigara dumanlı bilge baba — tüm seri",                  ic:"🚬", cs:60, st:50, sz:90, ik:82, kr:78, sd:96 },
+  { n:"Memur Cevdet",           s:"Sessiz, güvenilir genç ekip üyesi — Sezon 1-3",        ic:"🗒️", cs:65, st:55, sz:65, ik:50, kr:60, sd:88 },
+  { n:"Çabuk Selim",            s:"Junior polis — Sezon 1-3",                              ic:"🏃", cs:72, st:60, sz:68, ik:60, kr:65, sd:85 },
+  { n:"Tahsin Yılmaz",          s:"Bürokratik kayıkçı, kritik yardımcı — tüm seri",       ic:"📞", cs:65, st:60, sz:75, ik:78, kr:70, sd:82 },
+  { n:"Ercüment Çözer",         s:"Saygı takıntılı psikopat iş adamı — Sezon 2-3",        ic:"💼", cs:82, st:72, sz:92, ik:60, kr:96, sd:28 },
+  { n:"Memduh Başgan",          s:"Küfürbaz derin devlet polis amiri — Sezon 2-3",        ic:"🕴️", cs:78, st:88, sz:80, ik:88, kr:70, sd:22 },
+  { n:"Şule",                   s:"Behzat'ın biyolojik kızı, Berna'nın katili",            ic:"🎭", cs:88, st:72, sz:92, ik:72, kr:95, sd:22 },
+  { n:"Berna Çakırbey",         s:"Behzat'ın öldürülen kızı — Sezon 1 motivasyonu",       ic:"🌸", cs:70, st:35, sz:65, ik:30, kr:82, sd:95 },
+  { n:"Mürsel \"Ateş\"",         s:"Çekiç ve Gül'ün seri katili antagonisti",              ic:"🔥", cs:85, st:88, sz:90, ik:50, kr:78, sd:18 },
+];
+
+function buildBehzatDeck(): DeckTheme {
+  const stats = [
+    { id:"cesaret",  label:"Cesaret",  shortLabel:"CS", higherIsBetter:true },
+    { id:"sertlik",  label:"Sertlik",  shortLabel:"ST", higherIsBetter:true },
+    { id:"sezgi",    label:"Sezgi",    shortLabel:"SZ", higherIsBetter:true },
+    { id:"icki",     label:"İçki",     shortLabel:"İÇ", higherIsBetter:true },
+    { id:"karizma",  label:"Karizma",  shortLabel:"KZ", higherIsBetter:true },
+    { id:"sadakat",  label:"Sadakat",  shortLabel:"SD", higherIsBetter:true },
+  ];
+  const cards: Card[] = BZ_CARDS.map((c, i) => {
+    const id = `bz-${String(i + 1).padStart(2, "0")}`;
+    return {
+      id,
+      name: c.n,
+      subtitle: c.s,
+      image: artFor(id) ?? makeSvg(c.ic, c.n, c.s, "#dc2626", "#1a0606", "#220808", "#3a0e0e"),
+      stats: { cesaret:c.cs, sertlik:c.st, sezgi:c.sz, icki:c.ik, karizma:c.kr, sadakat:c.sd },
+    };
+  });
+  return {
+    id: "behzat",
+    title: "Behzat Ç.",
+    tagline: "30 karakter, beş dönem — Ankara'nın efsane Cinayet Büro Amirliği",
+    description: "Behzat ve ekibinin yas, dostluk, raki ve sokak adaleti dönemlerini karşılaştırın.",
+    accent: "#dc2626",
+    accentSoft: "rgba(220,38,38,0.15)",
+    stats,
+    cards,
+  };
+}
+
 export const DECKS: DeckTheme[] = [
   buildStarWarsDeck(),
   buildFoundationDeck(),
   buildMedievalDeck(),
   buildPokemonDeck(),
   buildSpongebobDeck(),
+  buildBehzatDeck(),
 ];
 
 export function getDeckById(id: string): DeckTheme | undefined {

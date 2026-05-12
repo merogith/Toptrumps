@@ -446,6 +446,7 @@ const DECK_ICONS: Record<string, string> = {
   medieval: "⚔️",
   pokemon: "⚡",
   spongebob: "🧽",
+  behzat: "🕵️",
 };
 
 function renderThemePick(): HTMLElement {
