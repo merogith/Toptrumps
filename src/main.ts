@@ -909,6 +909,10 @@ function botReactionLine(g: GameSnapshot, winner: PlayerId | "tie", margin: numb
   return "";
 }
 
+/* Tracks which round we last ran the count-up animation for, so toggling
+   the mobile card view does NOT restart the reveal sequence. */
+let lastAnimatedRoundKey: string | null = null;
+
 function renderRoundResult(): HTMLElement {
   const frag = el("div", "stack");
   if (!game.theme || !game.lastRound) return frag;
@@ -919,19 +923,25 @@ function renderRoundResult(): HTMLElement {
   const matchFinished = game.p1.length === 0 || game.p2.length === 0;
   const margin = Math.abs(lr.p1Value - lr.p2Value);
 
-  /* Haptic on mount — short = lose/tie, success pattern = win.
-     Only fire when there's a human in the seat (bot mode or 2P).  */
-  const userWon = game.bot
-    ? winnerPid !== null && winnerPid !== game.bot.player
-    : false;
-  if (game.bot) {
+  /* Animation gating — only animate on first render of this round. */
+  const roundKey = `${lr.statId}-${game.p1.length}-${game.p2.length}-${lr.p1Card.id}-${lr.p2Card.id}`;
+  const isFirstReveal = lastAnimatedRoundKey !== roundKey;
+  if (isFirstReveal) lastAnimatedRoundKey = roundKey;
+
+  /* Haptic only on first reveal of the round (not on toggle re-renders). */
+  if (game.bot && isFirstReveal) {
+    const userWon = winnerPid !== null && winnerPid !== game.bot.player;
     if (isTie) haptic(40);
     else if (userWon) haptic([20, 60, 30, 60, 80]);
     else haptic([80, 80, 20]);
   }
 
+  /* Determine human side on mobile: in bot mode, the human is the
+     non-bot player; in 2P pass-and-play, we don't toggle (both human). */
+  const humanSide: PlayerId | null = game.bot ? otherPlayer(game.bot.player) : null;
+
   /* Sticky action bar at the top of the viewport so the player never has
-     to scroll past two tall cards to reach the next-round button. */
+     to scroll past tall card content to reach the next-round button. */
   const ctaBar = el("div", "play-cta-dock");
   const ctaBtn = el("button", "btn btn-primary");
   ctaBtn.type = "button";
@@ -946,87 +956,66 @@ function renderRoundResult(): HTMLElement {
   ctaBar.appendChild(ctaBtn);
   frag.appendChild(ctaBar);
 
-  /* Result banner */
-  const banner = el("div", `result-banner reveal-pop ${isTie ? "is-tie" : "is-win"}`);
+  /* Compact result summary — minimalist verdict + score + reveal toggle.
+     One card replaces the previous three stacked blocks. */
+  const summary = el("div", `result-summary ${isTie ? "is-tie" : "is-win"}${isFirstReveal ? " reveal-pop" : ""}`);
 
-  const icon = el("div", "result-icon");
-  icon.setAttribute("aria-hidden", "true");
-  icon.textContent = isTie ? "🤝" : "🏆";
+  /* Verdict row: small trophy + headline + stat sublabel */
+  const verdict = el("div", "rs-verdict");
+  const vIcon = el("span", "rs-icon");
+  vIcon.setAttribute("aria-hidden", "true");
+  vIcon.textContent = isTie ? "🤝" : "🏆";
+  const vText = el("div", "rs-text");
+  const vHead = el("div", "rs-headline");
+  /* "You win" (no s) for the human; "Bot wins" / "Player 1 wins" otherwise. */
+  const winnerLabel = winnerPid !== null ? playerLabel(winnerPid, game) : "";
+  const winVerb = winnerLabel === "You" ? "win" : "wins";
+  vHead.textContent = isTie ? "Draw" : `${winnerLabel} ${winVerb}`;
+  const vSub = el("div", "rs-sublabel");
+  vSub.textContent = `${lr.statLabel} · ${lr.higherIsBetter ? "higher wins" : "lower wins"}`;
+  vText.append(vHead, vSub);
+  verdict.append(vIcon, vText);
+  summary.appendChild(verdict);
 
-  const headline = el("h1");
-  headline.textContent = isTie ? "Draw!" : `${playerLabel(winnerPid!, game)} wins!`;
+  /* Score row: P1 value · vs · P2 value, compact */
+  const score = el("div", "rs-score");
 
-  const statLine = el("p", "result-stat-line");
-  statLine.innerHTML = `<strong>${escapeHtml(lr.statLabel)}</strong> · ${lr.higherIsBetter ? "higher wins" : "lower wins"}`;
-  banner.append(icon, headline, statLine);
-  if (isTie) {
-    const extra = el("p", "result-stat-line");
-    extra.textContent = `${game.kitty.length} card${game.kitty.length !== 1 ? "s" : ""} go to the centre pile.`;
-    banner.append(extra);
+  const s1 = el("div", "rs-side");
+  const s1lbl = el("div", "rs-side-label");
+  s1lbl.textContent = playerLabel(1, game);
+  const s1val = el("div", `rs-side-value${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
+  s1val.textContent = isFirstReveal ? "0" : String(lr.p1Value);
+  s1.append(s1lbl, s1val);
+
+  const sVs = el("div", "rs-vs");
+  sVs.textContent = "VS";
+
+  const s2 = el("div", "rs-side");
+  const s2lbl = el("div", "rs-side-label");
+  s2lbl.textContent = playerLabel(2, game);
+  const s2val = el("div", `rs-side-value${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
+  s2val.textContent = isFirstReveal ? "0" : String(lr.p2Value);
+  s2.append(s2lbl, s2val);
+
+  score.append(s1, sVs, s2);
+  summary.appendChild(score);
+
+  if (isFirstReveal) {
+    queueMicrotask(() => {
+      animateCount(s1val, lr.p1Value);
+      animateCount(s2val, lr.p2Value);
+    });
   }
-  frag.appendChild(banner);
 
-  /* Bot reaction quip (bot mode only, gives the bot personality) */
-  if (game.bot) {
-    const quipText = botReactionLine(game, lr.winner, margin);
-    if (quipText) {
-      const quip = el("p", "bot-quip reveal-fade");
-      quip.textContent = quipText;
-      frag.appendChild(quip);
-    }
-  }
+  frag.appendChild(summary);
 
-  /* Big stat-first VS comparison with animated count-up */
-  const cmp = el("div", "stat-compare big reveal-pop");
-
-  const p1side = el("div", "sc-player");
-  const p1lbl = el("div", "sc-label");
-  p1lbl.textContent = playerLabel(1, game);
-  const p1val = el("div", `sc-value${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  p1val.textContent = "0";
-  p1side.append(p1lbl, p1val);
-
-  const divider = el("div", "sc-divider");
-  divider.innerHTML = `${escapeHtml(lr.statLabel)}<br><span class="sc-vs">VS</span>`;
-
-  const p2side = el("div", "sc-player");
-  const p2lbl = el("div", "sc-label");
-  p2lbl.textContent = playerLabel(2, game);
-  const p2val = el("div", `sc-value${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
-  p2val.textContent = "0";
-  p2side.append(p2lbl, p2val);
-
-  cmp.append(p1side, divider, p2side);
-  frag.appendChild(cmp);
-
-  /* Trigger count-up after the element mounts. */
-  queueMicrotask(() => {
-    animateCount(p1val, lr.p1Value);
-    animateCount(p2val, lr.p2Value);
-  });
-
-  /* Card count strip */
-  const scoreLine = el("p", "score-line");
-  let scoreText = `Cards — ${playerLabel(1, game)}: ${game.p1.length} · ${playerLabel(2, game)}: ${game.p2.length}`;
-  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
-  scoreLine.textContent = scoreText;
-  frag.appendChild(scoreLine);
-
-  /* Collapsible full-card view. <details> works without JS, is keyboard
-     accessible, and on desktop we force it open via CSS so power users
-     always see both cards. */
-  const details = document.createElement("details");
-  details.className = "compare-details";
-  /* Open by default on desktop via CSS; closed on mobile. We don't set
-     `open` here so mobile stays collapsed. */
-  const summary = document.createElement("summary");
-  summary.className = "compare-summary";
-  summary.innerHTML = `<span class="cd-chevron" aria-hidden="true">▾</span><span>See both cards</span>`;
-  details.appendChild(summary);
-
-  const grid = el("div", "compare-grid two");
+  /* Card display area — both cards in DOM; CSS hides the non-active one
+     on mobile, shows both on desktop. */
+  const cardArea = el("div", "result-cards");
+  if (humanSide) cardArea.dataset.mobileSide = String(humanSide);
 
   const wrap1 = el("div", "compare-player");
+  wrap1.dataset.side = "1";
   const lbl1 = el("div", `compare-player-label${!isTie && winnerPid === 1 ? " is-winner" : !isTie ? " is-loser" : ""}`);
   lbl1.textContent = playerLabel(1, game) + (!isTie && winnerPid === 1 ? " 🏆" : "");
   wrap1.append(lbl1, renderCard(game.theme, lr.p1Card, {
@@ -1037,6 +1026,7 @@ function renderRoundResult(): HTMLElement {
   }));
 
   const wrap2 = el("div", "compare-player");
+  wrap2.dataset.side = "2";
   const lbl2 = el("div", `compare-player-label${!isTie && winnerPid === 2 ? " is-winner" : !isTie ? " is-loser" : ""}`);
   lbl2.textContent = playerLabel(2, game) + (!isTie && winnerPid === 2 ? " 🏆" : "");
   wrap2.append(lbl2, renderCard(game.theme, lr.p2Card, {
@@ -1046,9 +1036,64 @@ function renderRoundResult(): HTMLElement {
     thisPlayer: 2,
   }));
 
-  grid.append(wrap1, wrap2);
-  details.appendChild(grid);
-  frag.appendChild(details);
+  cardArea.append(wrap1, wrap2);
+
+  /* Mobile-only reveal toggle (bot mode only — there's a meaningful
+     "your card vs theirs" distinction). Lives inside the summary panel
+     so the three pieces — verdict, score, toggle — sit together. */
+  if (humanSide) {
+    const toggleBtn = el("button", "rs-reveal-toggle");
+    toggleBtn.type = "button";
+    const updateToggleLabel = () => {
+      const showingHuman = cardArea.dataset.mobileSide === String(humanSide);
+      toggleBtn.innerHTML = showingHuman
+        ? `<span aria-hidden="true">👁</span><span>Reveal bot's card</span>`
+        : `<span aria-hidden="true">↩</span><span>Show my card</span>`;
+      toggleBtn.setAttribute("aria-pressed", showingHuman ? "false" : "true");
+    };
+    updateToggleLabel();
+    toggleBtn.addEventListener("click", () => {
+      const current = Number(cardArea.dataset.mobileSide ?? humanSide) as PlayerId;
+      const next = otherPlayer(current);
+      cardArea.dataset.mobileSide = String(next);
+      updateToggleLabel();
+      /* Brief flip animation on the card being revealed */
+      const reveal = cardArea.querySelector<HTMLElement>(`.compare-player[data-side="${next}"]`);
+      if (reveal && !prefersReducedMotion()) {
+        reveal.classList.remove("flip-in");
+        /* force reflow so re-adding the class re-runs the animation */
+        void reveal.offsetWidth;
+        reveal.classList.add("flip-in");
+      }
+      haptic(15);
+    });
+    summary.appendChild(toggleBtn);
+  }
+
+  frag.appendChild(cardArea);
+
+  /* Bot reaction quip — small, under the cards */
+  if (game.bot) {
+    const quipText = botReactionLine(game, lr.winner, margin);
+    if (quipText) {
+      const quip = el("p", "bot-quip");
+      quip.textContent = quipText;
+      frag.appendChild(quip);
+    }
+  }
+
+  if (isTie) {
+    const tieNote = el("p", "score-line");
+    tieNote.textContent = `${game.kitty.length} card${game.kitty.length !== 1 ? "s" : ""} go to the centre pile.`;
+    frag.appendChild(tieNote);
+  }
+
+  /* Card count strip */
+  const scoreLine = el("p", "score-line");
+  let scoreText = `Cards — ${playerLabel(1, game)}: ${game.p1.length} · ${playerLabel(2, game)}: ${game.p2.length}`;
+  if (game.kitty.length) scoreText += ` · Centre: ${game.kitty.length}`;
+  scoreLine.textContent = scoreText;
+  frag.appendChild(scoreLine);
 
   const tb = el("div", "toolbar");
   const quit = el("button", "btn btn-danger btn-sm");
