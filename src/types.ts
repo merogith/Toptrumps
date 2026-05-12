@@ -16,6 +16,8 @@ export interface Card {
   subtitle?: string;
   /** Artwork URL or inline data URI. Falls back to placeholder SVG if absent or on error. */
   image?: string;
+  /** CSS object-position for the artwork (e.g. "center 20%", "top"). Defaults to "center 28%". */
+  imageFocus?: string;
   stats: Record<string, number>;
 }
 
