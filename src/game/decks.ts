@@ -549,6 +549,7 @@ export function getDeckById(id: string): DeckTheme | undefined {
   return DECKS.find((d) => d.id === id);
 }
 
-export function cardImageUrl(_deckId: string, _cardId: string): string {
+/** The generic placeholder image, used as the final fallback when card art fails to load. */
+export function cardPlaceholderUrl(): string {
   return PLACEHOLDER_IMG;
 }

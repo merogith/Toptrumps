@@ -1,5 +1,5 @@
 import type { Card, DeckTheme, PlayerId } from "../types";
-import { cardImageUrl } from "../game/decks";
+import { cardPlaceholderUrl } from "../game/decks";
 import { el } from "../ui/dom";
 import { cardNum, deckShortName } from "../ui/labels";
 
@@ -42,12 +42,12 @@ export function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = 
   /* Artwork — falls back to the placeholder SVG on load error */
   const imgWrap = el("div", "card-image-wrap");
   const img = document.createElement("img");
-  img.src = card.image ?? cardImageUrl(theme.id, card.id);
+  img.src = card.image ?? cardPlaceholderUrl();
   img.alt = "";
   img.decoding = "async";
   if (card.imageFocus) img.style.objectPosition = card.imageFocus;
   img.onerror = () => {
-    img.src = cardImageUrl(theme.id, card.id);
+    img.src = cardPlaceholderUrl();
   };
   imgWrap.appendChild(img);
   wrap.appendChild(imgWrap);
