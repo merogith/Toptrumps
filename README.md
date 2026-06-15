@@ -82,8 +82,8 @@ npm run fetch:cards
 
 - Reads a `cardId → [(source, article-title), …]` map at the top of the file. Sources are:
   - `wookieepedia` → `starwars.fandom.com`
-  - `foundation`   → `foundation.fandom.com`
-  - `wikipedia`    → `en.wikipedia.org`
+  - `foundation` → `foundation.fandom.com`
+  - `wikipedia` → `en.wikipedia.org`
 - Calls each source's MediaWiki `api.php` (`prop=pageimages`, `pithumbsize=480`, `redirects=1`) until one returns a thumbnail.
 - Downloads to `public/cards/<cardId>.<ext>` and merges the relative path into `src/data/card-art-manifest.json` (existing entries are kept, so a partial run is safe).
 - Cards that strike out on every candidate keep the themed SVG fallback.
@@ -92,11 +92,11 @@ CI does this automatically — see `.github/workflows/deploy-pages.yml`, which r
 
 ### Fair-use notice — please read
 
-The Star Wars and *Foundation* article thumbnails on the Fandom wikis are uploaded there for editorial commentary under fair-use claims (low-resolution stills used in articles *about* the depicted subject). Using those same low-resolution thumbnails inside a personal, non-commercial Top Trumps deck is the same legal posture: educational / fan-game fair use. You should:
+The Star Wars and _Foundation_ article thumbnails on the Fandom wikis are uploaded there for editorial commentary under fair-use claims (low-resolution stills used in articles _about_ the depicted subject). Using those same low-resolution thumbnails inside a personal, non-commercial Top Trumps deck is the same legal posture: educational / fan-game fair use. You should:
 
 - Keep this repository non-commercial (no ads, no paid distribution, no merchandise).
 - Not redistribute the populated `public/cards/` folder as a standalone image set.
-- Treat the deployed GitHub Pages site as a personal hobby project (Disney/Lucasfilm own Star Wars; Apple TV+ and the Asimov estate own *Foundation*).
+- Treat the deployed GitHub Pages site as a personal hobby project (Disney/Lucasfilm own Star Wars; Apple TV+ and the Asimov estate own _Foundation_).
 
 The medieval cards pull from English Wikipedia, where lead images are usually public-domain paintings, engravings, and woodcuts that can be reused freely.
 

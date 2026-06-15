@@ -43,13 +43,13 @@ const OUT_DIR = path.join(ROOT, "public", "cards");
 const MANIFEST = path.join(ROOT, "src", "data", "card-art-manifest.json");
 
 const SOURCES = {
-  wookieepedia: { host: "starwars.fandom.com",        base: "https://starwars.fandom.com" },
-  foundation:   { host: "foundation.fandom.com",      base: "https://foundation.fandom.com" },
-  bulbapedia:   { host: "bulbapedia.bulbagarden.net", base: "https://bulbapedia.bulbagarden.net" },
-  spongebob:    { host: "spongebob.fandom.com",       base: "https://spongebob.fandom.com" },
-  behzatc:      { host: "behzatc.fandom.com",         base: "https://behzatc.fandom.com" },
-  trwiki:       { host: "tr.wikipedia.org",           base: "https://tr.wikipedia.org" },
-  wikipedia:    { host: "en.wikipedia.org",           base: "https://en.wikipedia.org" },
+  wookieepedia: { host: "starwars.fandom.com", base: "https://starwars.fandom.com" },
+  foundation: { host: "foundation.fandom.com", base: "https://foundation.fandom.com" },
+  bulbapedia: { host: "bulbapedia.bulbagarden.net", base: "https://bulbapedia.bulbagarden.net" },
+  spongebob: { host: "spongebob.fandom.com", base: "https://spongebob.fandom.com" },
+  behzatc: { host: "behzatc.fandom.com", base: "https://behzatc.fandom.com" },
+  trwiki: { host: "tr.wikipedia.org", base: "https://tr.wikipedia.org" },
+  wikipedia: { host: "en.wikipedia.org", base: "https://en.wikipedia.org" },
 };
 
 const COMMONS_BASE = "https://commons.wikimedia.org";
@@ -60,12 +60,12 @@ const UA =
 // Thematic last-resort image per deck — guaranteed to exist on Wikipedia,
 // so even an obscure card lands on something visually on-brand.
 const DECK_FALLBACK = {
-  sw:    ["wikipedia", "Star Wars"],                       // SW logo / hero art
-  found: ["wikipedia", "Foundation (Asimov novel)"],       // first-book cover
-  med:   ["wikipedia", "Medieval warfare"],                // period painting
-  poke:  ["wikipedia", "Pokémon"],                         // franchise logo
-  sb:    ["wikipedia", "SpongeBob SquarePants"],           // show logo
-  bz:    ["trwiki",    "Behzat Ç. Bir Ankara Polisiyesi"], // show poster
+  sw: ["wikipedia", "Star Wars"], // SW logo / hero art
+  found: ["wikipedia", "Foundation (Asimov novel)"], // first-book cover
+  med: ["wikipedia", "Medieval warfare"], // period painting
+  poke: ["wikipedia", "Pokémon"], // franchise logo
+  sb: ["wikipedia", "SpongeBob SquarePants"], // show logo
+  bz: ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi"], // show poster
 };
 
 // PokeAPI hosts official Game Freak artwork at a stable URL pattern keyed by
@@ -80,97 +80,336 @@ const POKEAPI_ART = (dex) =>
 const CARDS = {
   // ---------- Star Wars — Wookieepedia ----------
   "sw-01": [["wookieepedia", "Millennium Falcon"]],
-  "sw-02": [["wookieepedia", "T-65B X-wing starfighter"], ["wookieepedia", "X-wing"], ["wikipedia", "X-wing starfighter"]],
-  "sw-03": [["wookieepedia", "TIE Advanced x1"], ["wookieepedia", "TIE Advanced"]],
-  "sw-04": [["wookieepedia", "DS-1 Death Star Mobile Battle Station"], ["wookieepedia", "Death Star"], ["wikipedia", "Death Star"]],
-  "sw-05": [["wookieepedia", "Imperial-class Star Destroyer"], ["wookieepedia", "Star Destroyer"], ["wikipedia", "Star Destroyer"]],
-  "sw-06": [["wookieepedia", "Executor"], ["wookieepedia", "Executor-class Star Dreadnought"]],
-  "sw-07": [["wookieepedia", "RZ-1 A-wing interceptor"], ["wookieepedia", "A-wing"]],
-  "sw-08": [["wookieepedia", "A/SF-01 B-wing starfighter"], ["wookieepedia", "B-wing"]],
-  "sw-09": [["wookieepedia", "BTL-A4 Y-wing assault starfighter/bomber"], ["wookieepedia", "Y-wing"]],
-  "sw-10": [["wookieepedia", "TIE/ln space superiority starfighter"], ["wookieepedia", "TIE/LN starfighter"], ["wikipedia", "TIE fighter"]],
-  "sw-11": [["wookieepedia", "TIE/IN interceptor"], ["wookieepedia", "TIE Interceptor"]],
-  "sw-12": [["wookieepedia", "TIE/sa bomber"], ["wookieepedia", "TIE Bomber"]],
-  "sw-13": [["wookieepedia", "Slave I"], ["wookieepedia", "Firespray-31-class patrol craft"]],
-  "sw-14": [["wookieepedia", "Delta-7 Aethersprite-class light interceptor"], ["wookieepedia", "Jedi starfighter"]],
-  "sw-15": [["wookieepedia", "J-type 327 Nubian royal starship"], ["wookieepedia", "Naboo Royal Starship"]],
+  "sw-02": [
+    ["wookieepedia", "T-65B X-wing starfighter"],
+    ["wookieepedia", "X-wing"],
+    ["wikipedia", "X-wing starfighter"],
+  ],
+  "sw-03": [
+    ["wookieepedia", "TIE Advanced x1"],
+    ["wookieepedia", "TIE Advanced"],
+  ],
+  "sw-04": [
+    ["wookieepedia", "DS-1 Death Star Mobile Battle Station"],
+    ["wookieepedia", "Death Star"],
+    ["wikipedia", "Death Star"],
+  ],
+  "sw-05": [
+    ["wookieepedia", "Imperial-class Star Destroyer"],
+    ["wookieepedia", "Star Destroyer"],
+    ["wikipedia", "Star Destroyer"],
+  ],
+  "sw-06": [
+    ["wookieepedia", "Executor"],
+    ["wookieepedia", "Executor-class Star Dreadnought"],
+  ],
+  "sw-07": [
+    ["wookieepedia", "RZ-1 A-wing interceptor"],
+    ["wookieepedia", "A-wing"],
+  ],
+  "sw-08": [
+    ["wookieepedia", "A/SF-01 B-wing starfighter"],
+    ["wookieepedia", "B-wing"],
+  ],
+  "sw-09": [
+    ["wookieepedia", "BTL-A4 Y-wing assault starfighter/bomber"],
+    ["wookieepedia", "Y-wing"],
+  ],
+  "sw-10": [
+    ["wookieepedia", "TIE/ln space superiority starfighter"],
+    ["wookieepedia", "TIE/LN starfighter"],
+    ["wikipedia", "TIE fighter"],
+  ],
+  "sw-11": [
+    ["wookieepedia", "TIE/IN interceptor"],
+    ["wookieepedia", "TIE Interceptor"],
+  ],
+  "sw-12": [
+    ["wookieepedia", "TIE/sa bomber"],
+    ["wookieepedia", "TIE Bomber"],
+  ],
+  "sw-13": [
+    ["wookieepedia", "Slave I"],
+    ["wookieepedia", "Firespray-31-class patrol craft"],
+  ],
+  "sw-14": [
+    ["wookieepedia", "Delta-7 Aethersprite-class light interceptor"],
+    ["wookieepedia", "Jedi starfighter"],
+  ],
+  "sw-15": [
+    ["wookieepedia", "J-type 327 Nubian royal starship"],
+    ["wookieepedia", "Naboo Royal Starship"],
+  ],
   "sw-16": [["wookieepedia", "Venator-class Star Destroyer"]],
-  "sw-17": [["wookieepedia", "Malevolence"], ["wookieepedia", "Subjugator-class heavy cruiser"]],
-  "sw-18": [["wookieepedia", "MC80 Liberty type Star Cruiser"], ["wookieepedia", "MC80 Star Cruiser"], ["wookieepedia", "Home One"]],
-  "sw-19": [["wookieepedia", "CR90 corvette"], ["wookieepedia", "Tantive IV"]],
-  "sw-20": [["wookieepedia", "EF76 Nebulon-B escort frigate"], ["wookieepedia", "Nebulon-B frigate"]],
-  "sw-21": [["wookieepedia", "Ghost"], ["wookieepedia", "VCX-100 light freighter"]],
+  "sw-17": [
+    ["wookieepedia", "Malevolence"],
+    ["wookieepedia", "Subjugator-class heavy cruiser"],
+  ],
+  "sw-18": [
+    ["wookieepedia", "MC80 Liberty type Star Cruiser"],
+    ["wookieepedia", "MC80 Star Cruiser"],
+    ["wookieepedia", "Home One"],
+  ],
+  "sw-19": [
+    ["wookieepedia", "CR90 corvette"],
+    ["wookieepedia", "Tantive IV"],
+  ],
+  "sw-20": [
+    ["wookieepedia", "EF76 Nebulon-B escort frigate"],
+    ["wookieepedia", "Nebulon-B frigate"],
+  ],
+  "sw-21": [
+    ["wookieepedia", "Ghost"],
+    ["wookieepedia", "VCX-100 light freighter"],
+  ],
   "sw-22": [["wookieepedia", "Razor Crest"]],
-  "sw-23": [["wookieepedia", "N-1 starfighter"], ["wookieepedia", "Naboo N-1 starfighter"]],
-  "sw-24": [["wookieepedia", "Eta-2 Actis-class light interceptor"], ["wookieepedia", "Eta-2 Actis-class interceptor"]],
-  "sw-25": [["wookieepedia", "Invisible Hand"], ["wookieepedia", "Providence-class Dreadnought"]],
-  "sw-26": [["wookieepedia", "Eclipse"], ["wookieepedia", "Eclipse-class dreadnought"]],
-  "sw-27": [["wookieepedia", "Scimitar"], ["wookieepedia", "Sith Infiltrator"]],
-  "sw-28": [["wookieepedia", "Profundity"], ["wookieepedia", "MC85 Star Cruiser"], ["wookieepedia", "Raddus"]],
-  "sw-29": [["wookieepedia", "Sphyrna-class corvette"], ["wookieepedia", "Hammerhead corvette"]],
-  "sw-30": [["wookieepedia", "Kom'rk-class fighter/transport"], ["wookieepedia", "Gauntlet starfighter"]],
+  "sw-23": [
+    ["wookieepedia", "N-1 starfighter"],
+    ["wookieepedia", "Naboo N-1 starfighter"],
+  ],
+  "sw-24": [
+    ["wookieepedia", "Eta-2 Actis-class light interceptor"],
+    ["wookieepedia", "Eta-2 Actis-class interceptor"],
+  ],
+  "sw-25": [
+    ["wookieepedia", "Invisible Hand"],
+    ["wookieepedia", "Providence-class Dreadnought"],
+  ],
+  "sw-26": [
+    ["wookieepedia", "Eclipse"],
+    ["wookieepedia", "Eclipse-class dreadnought"],
+  ],
+  "sw-27": [
+    ["wookieepedia", "Scimitar"],
+    ["wookieepedia", "Sith Infiltrator"],
+  ],
+  "sw-28": [
+    ["wookieepedia", "Profundity"],
+    ["wookieepedia", "MC85 Star Cruiser"],
+    ["wookieepedia", "Raddus"],
+  ],
+  "sw-29": [
+    ["wookieepedia", "Sphyrna-class corvette"],
+    ["wookieepedia", "Hammerhead corvette"],
+  ],
+  "sw-30": [
+    ["wookieepedia", "Kom'rk-class fighter/transport"],
+    ["wookieepedia", "Gauntlet starfighter"],
+  ],
 
   // ---------- Foundation — foundation.fandom.com → en.wikipedia.org ----------
   // Wikipedia fallback is given for every Foundation card so search has a
   // chance even when the Fandom article is a stub.
-  "found-01": [["foundation", "Hari Seldon"], ["wikipedia", "Hari Seldon"]],
-  "found-02": [["foundation", "The Mule"], ["wikipedia", "The Mule (Foundation)"]],
-  "found-03": [["foundation", "Salvor Hardin"], ["wikipedia", "Salvor Hardin"]],
-  "found-04": [["foundation", "Hober Mallow"], ["wikipedia", "Hober Mallow"]],
-  "found-05": [["foundation", "Bayta Darell"], ["wikipedia", "Bayta Darell"]],
-  "found-06": [["foundation", "Arkady Darell"], ["wikipedia", "Arkady Darell"]],
-  "found-07": [["foundation", "Ebling Mis"], ["wikipedia", "Ebling Mis"]],
-  "found-08": [["foundation", "Golan Trevize"], ["wikipedia", "Golan Trevize"]],
-  "found-09": [["foundation", "Bel Riose"], ["wikipedia", "Bel Riose"]],
-  "found-10": [["foundation", "R. Daneel Olivaw"], ["wikipedia", "R. Daneel Olivaw"]],
-  "found-11": [["foundation", "Dors Venabili"], ["wikipedia", "Dors Venabili"]],
-  "found-12": [["foundation", "R. Giskard Reventlov"], ["wikipedia", "R. Giskard Reventlov"]],
-  "found-13": [["foundation", "Cleon I"], ["wikipedia", "Cleon I"]],
-  "found-14": [["foundation", "Yugo Amaryl"], ["wikipedia", "Yugo Amaryl"]],
-  "found-15": [["foundation", "Stor Gendibal"], ["wikipedia", "Stor Gendibal"]],
-  "found-16": [["foundation", "Preem Palver"], ["wikipedia", "Preem Palver"]],
-  "found-17": [["foundation", "Wanda Seldon"], ["wikipedia", "Wanda Seldon"]],
-  "found-18": [["foundation", "Han Pritcher"], ["wikipedia", "Han Pritcher"]],
-  "found-19": [["foundation", "Ducem Barr"], ["wikipedia", "Ducem Barr"]],
-  "found-20": [["foundation", "Lord Stettin"], ["wikipedia", "Lord Stettin"]],
-  "found-21": [["foundation", "Indbur III"], ["wikipedia", "Indbur III"]],
-  "found-22": [["foundation", "Janov Pelorat"], ["wikipedia", "Janov Pelorat"]],
-  "found-23": [["foundation", "Bliss (Foundation)"], ["foundation", "Blissenobiarella"], ["wikipedia", "Bliss (Foundation)"]],
-  "found-24": [["foundation", "Magnifico Giganticus"], ["wikipedia", "Magnifico Giganticus"]],
-  "found-25": [["foundation", "Sef Sermak"], ["foundation", "Sermak"], ["wikipedia", "Sef Sermak"]],
-  "found-26": [["foundation", "Limmar Ponyets"], ["wikipedia", "Limmar Ponyets"]],
-  "found-27": [["foundation", "Onum Barr"], ["wikipedia", "Onum Barr"]],
-  "found-28": [["foundation", "Novi"], ["foundation", "Sura Novi"], ["wikipedia", "Sura Novi"]],
-  "found-29": [["foundation", "Eto Demerzel"], ["foundation", "Demerzel"], ["wikipedia", "Eto Demerzel"]],
-  "found-30": [["foundation", "Raych Seldon"], ["foundation", "Raych Foss"], ["wikipedia", "Raych Seldon"]],
+  "found-01": [
+    ["foundation", "Hari Seldon"],
+    ["wikipedia", "Hari Seldon"],
+  ],
+  "found-02": [
+    ["foundation", "The Mule"],
+    ["wikipedia", "The Mule (Foundation)"],
+  ],
+  "found-03": [
+    ["foundation", "Salvor Hardin"],
+    ["wikipedia", "Salvor Hardin"],
+  ],
+  "found-04": [
+    ["foundation", "Hober Mallow"],
+    ["wikipedia", "Hober Mallow"],
+  ],
+  "found-05": [
+    ["foundation", "Bayta Darell"],
+    ["wikipedia", "Bayta Darell"],
+  ],
+  "found-06": [
+    ["foundation", "Arkady Darell"],
+    ["wikipedia", "Arkady Darell"],
+  ],
+  "found-07": [
+    ["foundation", "Ebling Mis"],
+    ["wikipedia", "Ebling Mis"],
+  ],
+  "found-08": [
+    ["foundation", "Golan Trevize"],
+    ["wikipedia", "Golan Trevize"],
+  ],
+  "found-09": [
+    ["foundation", "Bel Riose"],
+    ["wikipedia", "Bel Riose"],
+  ],
+  "found-10": [
+    ["foundation", "R. Daneel Olivaw"],
+    ["wikipedia", "R. Daneel Olivaw"],
+  ],
+  "found-11": [
+    ["foundation", "Dors Venabili"],
+    ["wikipedia", "Dors Venabili"],
+  ],
+  "found-12": [
+    ["foundation", "R. Giskard Reventlov"],
+    ["wikipedia", "R. Giskard Reventlov"],
+  ],
+  "found-13": [
+    ["foundation", "Cleon I"],
+    ["wikipedia", "Cleon I"],
+  ],
+  "found-14": [
+    ["foundation", "Yugo Amaryl"],
+    ["wikipedia", "Yugo Amaryl"],
+  ],
+  "found-15": [
+    ["foundation", "Stor Gendibal"],
+    ["wikipedia", "Stor Gendibal"],
+  ],
+  "found-16": [
+    ["foundation", "Preem Palver"],
+    ["wikipedia", "Preem Palver"],
+  ],
+  "found-17": [
+    ["foundation", "Wanda Seldon"],
+    ["wikipedia", "Wanda Seldon"],
+  ],
+  "found-18": [
+    ["foundation", "Han Pritcher"],
+    ["wikipedia", "Han Pritcher"],
+  ],
+  "found-19": [
+    ["foundation", "Ducem Barr"],
+    ["wikipedia", "Ducem Barr"],
+  ],
+  "found-20": [
+    ["foundation", "Lord Stettin"],
+    ["wikipedia", "Lord Stettin"],
+  ],
+  "found-21": [
+    ["foundation", "Indbur III"],
+    ["wikipedia", "Indbur III"],
+  ],
+  "found-22": [
+    ["foundation", "Janov Pelorat"],
+    ["wikipedia", "Janov Pelorat"],
+  ],
+  "found-23": [
+    ["foundation", "Bliss (Foundation)"],
+    ["foundation", "Blissenobiarella"],
+    ["wikipedia", "Bliss (Foundation)"],
+  ],
+  "found-24": [
+    ["foundation", "Magnifico Giganticus"],
+    ["wikipedia", "Magnifico Giganticus"],
+  ],
+  "found-25": [
+    ["foundation", "Sef Sermak"],
+    ["foundation", "Sermak"],
+    ["wikipedia", "Sef Sermak"],
+  ],
+  "found-26": [
+    ["foundation", "Limmar Ponyets"],
+    ["wikipedia", "Limmar Ponyets"],
+  ],
+  "found-27": [
+    ["foundation", "Onum Barr"],
+    ["wikipedia", "Onum Barr"],
+  ],
+  "found-28": [
+    ["foundation", "Novi"],
+    ["foundation", "Sura Novi"],
+    ["wikipedia", "Sura Novi"],
+  ],
+  "found-29": [
+    ["foundation", "Eto Demerzel"],
+    ["foundation", "Demerzel"],
+    ["wikipedia", "Eto Demerzel"],
+  ],
+  "found-30": [
+    ["foundation", "Raych Seldon"],
+    ["foundation", "Raych Foss"],
+    ["wikipedia", "Raych Seldon"],
+  ],
 
   // ---------- Medieval Warriors — Wikipedia ----------
-  "med-01": [["wikipedia", "English longbow"], ["wikipedia", "Longbowman"]],
-  "med-02": [["wikipedia", "Swiss mercenaries"], ["wikipedia", "Reisläufer"]],
-  "med-03": [["wikipedia", "Mongol military tactics and organization"], ["wikipedia", "Mongol bow"], ["wikipedia", "Mongol Empire"]],
-  "med-04": [["wikipedia", "Teutonic Order"], ["wikipedia", "Teutonic Knights"]],
-  "med-05": [["wikipedia", "Janissary"], ["wikipedia", "Janissaries"]],
+  "med-01": [
+    ["wikipedia", "English longbow"],
+    ["wikipedia", "Longbowman"],
+  ],
+  "med-02": [
+    ["wikipedia", "Swiss mercenaries"],
+    ["wikipedia", "Reisläufer"],
+  ],
+  "med-03": [
+    ["wikipedia", "Mongol military tactics and organization"],
+    ["wikipedia", "Mongol bow"],
+    ["wikipedia", "Mongol Empire"],
+  ],
+  "med-04": [
+    ["wikipedia", "Teutonic Order"],
+    ["wikipedia", "Teutonic Knights"],
+  ],
+  "med-05": [
+    ["wikipedia", "Janissary"],
+    ["wikipedia", "Janissaries"],
+  ],
   "med-06": [["wikipedia", "Samurai"]],
   "med-07": [["wikipedia", "Cataphract"]],
   "med-08": [["wikipedia", "Berserker"]],
-  "med-09": [["wikipedia", "Late Roman army"], ["wikipedia", "Comitatenses"]],
+  "med-09": [
+    ["wikipedia", "Late Roman army"],
+    ["wikipedia", "Comitatenses"],
+  ],
   "med-10": [["wikipedia", "Mamluk"]],
   "med-11": [["wikipedia", "Varangian Guard"]],
   "med-12": [["wikipedia", "Knight"]],
-  "med-13": [["wikipedia", "Eagle warrior"], ["wikipedia", "Aztec warfare"]],
+  "med-13": [
+    ["wikipedia", "Eagle warrior"],
+    ["wikipedia", "Aztec warfare"],
+  ],
   "med-14": [["wikipedia", "Tercio"]],
-  "med-15": [["wikipedia", "Highland charge"], ["wikipedia", "Scottish Highlanders"], ["wikipedia", "Highlander"]],
+  "med-15": [
+    ["wikipedia", "Highland charge"],
+    ["wikipedia", "Scottish Highlanders"],
+    ["wikipedia", "Highlander"],
+  ],
   "med-16": [["wikipedia", "Immortals (Achaemenid Empire)"]],
-  "med-17": [["wikipedia", "Polish hussars"], ["wikipedia", "Winged hussars"]],
-  "med-18": [["wikipedia", "Ironside (cavalry)"], ["wikipedia", "New Model Army"]],
-  "med-19": [["wikipedia", "Crusades"], ["wikipedia", "Crusader states"], ["wikipedia", "Knights Templar"]],
-  "med-20": [["wikipedia", "Housecarl"], ["wikipedia", "Huscarl"]],
-  "med-21": [["wikipedia", "Impi"], ["wikipedia", "Zulu warrior"]],
-  "med-22": [["wikipedia", "Welsh archers"], ["wikipedia", "English longbow"]],
-  "med-23": [["wikipedia", "Condottiero"], ["wikipedia", "Condottieri"]],
-  "med-24": [["wikipedia", "Wagenburg"], ["wikipedia", "Hussite Wars"]],
-  "med-25": [["wikipedia", "Crossbow"], ["wikipedia", "Chinese crossbow"]],
-  "med-26": [["wikipedia", "Seljuk Empire"], ["wikipedia", "Battle of Manzikert"]],
+  "med-17": [
+    ["wikipedia", "Polish hussars"],
+    ["wikipedia", "Winged hussars"],
+  ],
+  "med-18": [
+    ["wikipedia", "Ironside (cavalry)"],
+    ["wikipedia", "New Model Army"],
+  ],
+  "med-19": [
+    ["wikipedia", "Crusades"],
+    ["wikipedia", "Crusader states"],
+    ["wikipedia", "Knights Templar"],
+  ],
+  "med-20": [
+    ["wikipedia", "Housecarl"],
+    ["wikipedia", "Huscarl"],
+  ],
+  "med-21": [
+    ["wikipedia", "Impi"],
+    ["wikipedia", "Zulu warrior"],
+  ],
+  "med-22": [
+    ["wikipedia", "Welsh archers"],
+    ["wikipedia", "English longbow"],
+  ],
+  "med-23": [
+    ["wikipedia", "Condottiero"],
+    ["wikipedia", "Condottieri"],
+  ],
+  "med-24": [
+    ["wikipedia", "Wagenburg"],
+    ["wikipedia", "Hussite Wars"],
+  ],
+  "med-25": [
+    ["wikipedia", "Crossbow"],
+    ["wikipedia", "Chinese crossbow"],
+  ],
+  "med-26": [
+    ["wikipedia", "Seljuk Empire"],
+    ["wikipedia", "Battle of Manzikert"],
+  ],
   "med-27": [["wikipedia", "War elephant"]],
   "med-28": [["wikipedia", "Gallowglass"]],
   "med-29": [["wikipedia", "Rajput"]],
@@ -190,59 +429,117 @@ const CARDS = {
   "poke-07": [["url", POKEAPI_ART(7)]],
   "poke-08": [["url", POKEAPI_ART(8)]],
   "poke-09": [["url", POKEAPI_ART(9)]],
-  "poke-10": [["url", POKEAPI_ART(25)]],   // Pikachu
-  "poke-11": [["url", POKEAPI_ART(26)]],   // Raichu
-  "poke-12": [["url", POKEAPI_ART(150)]],  // Mewtwo
-  "poke-13": [["url", POKEAPI_ART(151)]],  // Mew
-  "poke-14": [["url", POKEAPI_ART(143)]],  // Snorlax
-  "poke-15": [["url", POKEAPI_ART(130)]],  // Gyarados
-  "poke-16": [["url", POKEAPI_ART(131)]],  // Lapras
-  "poke-17": [["url", POKEAPI_ART(149)]],  // Dragonite
-  "poke-18": [["url", POKEAPI_ART(133)]],  // Eevee
-  "poke-19": [["url", POKEAPI_ART(134)]],  // Vaporeon
-  "poke-20": [["url", POKEAPI_ART(135)]],  // Jolteon
-  "poke-21": [["url", POKEAPI_ART(136)]],  // Flareon
-  "poke-22": [["url", POKEAPI_ART(144)]],  // Articuno
-  "poke-23": [["url", POKEAPI_ART(145)]],  // Zapdos
-  "poke-24": [["url", POKEAPI_ART(146)]],  // Moltres
-  "poke-25": [["url", POKEAPI_ART(65)]],   // Alakazam
-  "poke-26": [["url", POKEAPI_ART(94)]],   // Gengar
-  "poke-27": [["url", POKEAPI_ART(68)]],   // Machamp
-  "poke-28": [["url", POKEAPI_ART(95)]],   // Onix
-  "poke-29": [["url", POKEAPI_ART(132)]],  // Ditto
-  "poke-30": [["url", POKEAPI_ART(59)]],   // Arcanine
+  "poke-10": [["url", POKEAPI_ART(25)]], // Pikachu
+  "poke-11": [["url", POKEAPI_ART(26)]], // Raichu
+  "poke-12": [["url", POKEAPI_ART(150)]], // Mewtwo
+  "poke-13": [["url", POKEAPI_ART(151)]], // Mew
+  "poke-14": [["url", POKEAPI_ART(143)]], // Snorlax
+  "poke-15": [["url", POKEAPI_ART(130)]], // Gyarados
+  "poke-16": [["url", POKEAPI_ART(131)]], // Lapras
+  "poke-17": [["url", POKEAPI_ART(149)]], // Dragonite
+  "poke-18": [["url", POKEAPI_ART(133)]], // Eevee
+  "poke-19": [["url", POKEAPI_ART(134)]], // Vaporeon
+  "poke-20": [["url", POKEAPI_ART(135)]], // Jolteon
+  "poke-21": [["url", POKEAPI_ART(136)]], // Flareon
+  "poke-22": [["url", POKEAPI_ART(144)]], // Articuno
+  "poke-23": [["url", POKEAPI_ART(145)]], // Zapdos
+  "poke-24": [["url", POKEAPI_ART(146)]], // Moltres
+  "poke-25": [["url", POKEAPI_ART(65)]], // Alakazam
+  "poke-26": [["url", POKEAPI_ART(94)]], // Gengar
+  "poke-27": [["url", POKEAPI_ART(68)]], // Machamp
+  "poke-28": [["url", POKEAPI_ART(95)]], // Onix
+  "poke-29": [["url", POKEAPI_ART(132)]], // Ditto
+  "poke-30": [["url", POKEAPI_ART(59)]], // Arcanine
 
   // ---------- SpongeBob — spongebob.fandom.com → Wikipedia ----------
-  "sb-01": [["spongebob", "SpongeBob SquarePants (character)"], ["spongebob", "SpongeBob SquarePants"], ["wikipedia", "SpongeBob SquarePants (character)"]],
-  "sb-02": [["spongebob", "Patrick Star"],            ["wikipedia", "Patrick Star"]],
-  "sb-03": [["spongebob", "Squidward Tentacles"],     ["wikipedia", "Squidward Tentacles"]],
-  "sb-04": [["spongebob", "Eugene H. Krabs"],         ["spongebob", "Mr. Krabs"], ["wikipedia", "Mr. Krabs"]],
-  "sb-05": [["spongebob", "Sandy Cheeks"],            ["wikipedia", "Sandy Cheeks"]],
-  "sb-06": [["spongebob", "Sheldon J. Plankton"],     ["spongebob", "Plankton"], ["wikipedia", "Sheldon J. Plankton"]],
-  "sb-07": [["spongebob", "Gary the Snail"],          ["wikipedia", "Gary the Snail"]],
-  "sb-08": [["spongebob", "Pearl Krabs"],             ["wikipedia", "Pearl Krabs"]],
-  "sb-09": [["spongebob", "Mrs. Puff"],               ["wikipedia", "Mrs. Puff"]],
-  "sb-10": [["spongebob", "Karen Plankton"],          ["spongebob", "Karen"], ["wikipedia", "Karen Plankton"]],
-  "sb-11": [["spongebob", "Mermaid Man"],             ["wikipedia", "Mermaid Man and Barnacle Boy"]],
-  "sb-12": [["spongebob", "Barnacle Boy"],            ["wikipedia", "Mermaid Man and Barnacle Boy"]],
+  "sb-01": [
+    ["spongebob", "SpongeBob SquarePants (character)"],
+    ["spongebob", "SpongeBob SquarePants"],
+    ["wikipedia", "SpongeBob SquarePants (character)"],
+  ],
+  "sb-02": [
+    ["spongebob", "Patrick Star"],
+    ["wikipedia", "Patrick Star"],
+  ],
+  "sb-03": [
+    ["spongebob", "Squidward Tentacles"],
+    ["wikipedia", "Squidward Tentacles"],
+  ],
+  "sb-04": [
+    ["spongebob", "Eugene H. Krabs"],
+    ["spongebob", "Mr. Krabs"],
+    ["wikipedia", "Mr. Krabs"],
+  ],
+  "sb-05": [
+    ["spongebob", "Sandy Cheeks"],
+    ["wikipedia", "Sandy Cheeks"],
+  ],
+  "sb-06": [
+    ["spongebob", "Sheldon J. Plankton"],
+    ["spongebob", "Plankton"],
+    ["wikipedia", "Sheldon J. Plankton"],
+  ],
+  "sb-07": [
+    ["spongebob", "Gary the Snail"],
+    ["wikipedia", "Gary the Snail"],
+  ],
+  "sb-08": [
+    ["spongebob", "Pearl Krabs"],
+    ["wikipedia", "Pearl Krabs"],
+  ],
+  "sb-09": [
+    ["spongebob", "Mrs. Puff"],
+    ["wikipedia", "Mrs. Puff"],
+  ],
+  "sb-10": [
+    ["spongebob", "Karen Plankton"],
+    ["spongebob", "Karen"],
+    ["wikipedia", "Karen Plankton"],
+  ],
+  "sb-11": [
+    ["spongebob", "Mermaid Man"],
+    ["wikipedia", "Mermaid Man and Barnacle Boy"],
+  ],
+  "sb-12": [
+    ["spongebob", "Barnacle Boy"],
+    ["wikipedia", "Mermaid Man and Barnacle Boy"],
+  ],
   "sb-13": [["spongebob", "Squilliam Fancyson"]],
   "sb-14": [["spongebob", "Larry the Lobster"]],
   "sb-15": [["spongebob", "Bubble Bass"]],
   "sb-16": [["spongebob", "Patchy the Pirate"]],
-  "sb-17": [["spongebob", "Flying Dutchman"], ["spongebob", "The Flying Dutchman"]],
+  "sb-17": [
+    ["spongebob", "Flying Dutchman"],
+    ["spongebob", "The Flying Dutchman"],
+  ],
   "sb-18": [["spongebob", "King Neptune"]],
-  "sb-19": [["spongebob", "Princess Mindy"], ["spongebob", "Mindy"]],
+  "sb-19": [
+    ["spongebob", "Princess Mindy"],
+    ["spongebob", "Mindy"],
+  ],
   "sb-20": [["spongebob", "DoodleBob"]],
   "sb-21": [["spongebob", "Man Ray"]],
-  "sb-22": [["spongebob", "The Dirty Bubble"], ["spongebob", "Dirty Bubble"]],
+  "sb-22": [
+    ["spongebob", "The Dirty Bubble"],
+    ["spongebob", "Dirty Bubble"],
+  ],
   "sb-23": [["spongebob", "Old Man Jenkins"]],
   "sb-24": [["spongebob", "Bubble Buddy"]],
-  "sb-25": [["spongebob", "Hash-Slinging Slasher"], ["spongebob", "The Hash-Slinging Slasher"]],
+  "sb-25": [
+    ["spongebob", "Hash-Slinging Slasher"],
+    ["spongebob", "The Hash-Slinging Slasher"],
+  ],
   "sb-26": [["spongebob", "Painty the Pirate"]],
   "sb-27": [["spongebob", "Realistic Fish Head"]],
-  "sb-28": [["spongebob", "Atomic Flounder"], ["spongebob", "The Atomic Flounder"]],
+  "sb-28": [
+    ["spongebob", "Atomic Flounder"],
+    ["spongebob", "The Atomic Flounder"],
+  ],
   "sb-29": [["spongebob", "Flats the Flounder"]],
-  "sb-30": [["spongebob", "Tom (fish)"], ["spongebob", "Tom"]],
+  "sb-30": [
+    ["spongebob", "Tom (fish)"],
+    ["spongebob", "Tom"],
+  ],
 
   // ---------- Behzat Ç. — behzatc.fandom.com → tr.wikipedia.org ----------
   // Era variants of the same character point to different per-season /
@@ -250,42 +547,124 @@ const CARDS = {
   // strict-title-match guard from PR #7 keeps Wikipedia/Commons search
   // from grabbing unrelated photos for Turkish-name lookups.
   /* Behzat — 6 era variants */
-  "bz-01": [["behzatc", "Behzat Çakırbey"],                       ["trwiki", "Behzat Ç. (karakter)"]],
-  "bz-02": [["behzatc", "Behzat Ç. Bir Ankara Polisiyesi"],       ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi"]],
-  "bz-03": [["behzatc", "Behzat Ç. Seni Kalbime Gömdüm"],         ["trwiki", "Behzat Ç. Seni Kalbime Gömdüm"]],
-  "bz-04": [["behzatc", "Behzat Ç. Ankara Yanıyor"],              ["trwiki", "Behzat Ç. Ankara Yanıyor"]],
-  "bz-05": [["behzatc", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"], ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"]],
-  "bz-06": [["behzatc", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"],  ["trwiki", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"]],
+  "bz-01": [
+    ["behzatc", "Behzat Çakırbey"],
+    ["trwiki", "Behzat Ç. (karakter)"],
+  ],
+  "bz-02": [
+    ["behzatc", "Behzat Ç. Bir Ankara Polisiyesi"],
+    ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi"],
+  ],
+  "bz-03": [
+    ["behzatc", "Behzat Ç. Seni Kalbime Gömdüm"],
+    ["trwiki", "Behzat Ç. Seni Kalbime Gömdüm"],
+  ],
+  "bz-04": [
+    ["behzatc", "Behzat Ç. Ankara Yanıyor"],
+    ["trwiki", "Behzat Ç. Ankara Yanıyor"],
+  ],
+  "bz-05": [
+    ["behzatc", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"],
+    ["trwiki", "Behzat Ç. Bir Ankara Polisiyesi (4. sezon)"],
+  ],
+  "bz-06": [
+    ["behzatc", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"],
+    ["trwiki", "Çekiç ve Gül: Bir Behzat Ç. Hikayesi"],
+  ],
   /* Harun — 4 era variants */
-  "bz-07": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
-  "bz-08": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
-  "bz-09": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
-  "bz-10": [["behzatc", "Harun Sinanoğlu"],                       ["trwiki", "Fatih Artman"]],
+  "bz-07": [
+    ["behzatc", "Harun Sinanoğlu"],
+    ["trwiki", "Fatih Artman"],
+  ],
+  "bz-08": [
+    ["behzatc", "Harun Sinanoğlu"],
+    ["trwiki", "Fatih Artman"],
+  ],
+  "bz-09": [
+    ["behzatc", "Harun Sinanoğlu"],
+    ["trwiki", "Fatih Artman"],
+  ],
+  "bz-10": [
+    ["behzatc", "Harun Sinanoğlu"],
+    ["trwiki", "Fatih Artman"],
+  ],
   /* Hayalet — 3 era variants */
-  "bz-11": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
-  "bz-12": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
-  "bz-13": [["behzatc", "Sabri Özay"],                            ["behzatc", "Hayalet"], ["trwiki", "İnanç Konukçu"]],
+  "bz-11": [
+    ["behzatc", "Sabri Özay"],
+    ["behzatc", "Hayalet"],
+    ["trwiki", "İnanç Konukçu"],
+  ],
+  "bz-12": [
+    ["behzatc", "Sabri Özay"],
+    ["behzatc", "Hayalet"],
+    ["trwiki", "İnanç Konukçu"],
+  ],
+  "bz-13": [
+    ["behzatc", "Sabri Özay"],
+    ["behzatc", "Hayalet"],
+    ["trwiki", "İnanç Konukçu"],
+  ],
   /* Akbaba — 3 era variants */
-  "bz-14": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
-  "bz-15": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
-  "bz-16": [["behzatc", "İsmet Arif Karasu"],                     ["behzatc", "Akbaba"], ["trwiki", "Berkan Şal"]],
+  "bz-14": [
+    ["behzatc", "İsmet Arif Karasu"],
+    ["behzatc", "Akbaba"],
+    ["trwiki", "Berkan Şal"],
+  ],
+  "bz-15": [
+    ["behzatc", "İsmet Arif Karasu"],
+    ["behzatc", "Akbaba"],
+    ["trwiki", "Berkan Şal"],
+  ],
+  "bz-16": [
+    ["behzatc", "İsmet Arif Karasu"],
+    ["behzatc", "Akbaba"],
+    ["trwiki", "Berkan Şal"],
+  ],
   /* Eda — 2 era variants */
-  "bz-17": [["behzatc", "Eda Akkaya"],                            ["trwiki", "Seda Bakan"]],
-  "bz-18": [["behzatc", "Eda Akkaya"],                            ["trwiki", "Seda Bakan"]],
+  "bz-17": [
+    ["behzatc", "Eda Akkaya"],
+    ["trwiki", "Seda Bakan"],
+  ],
+  "bz-18": [
+    ["behzatc", "Eda Akkaya"],
+    ["trwiki", "Seda Bakan"],
+  ],
   /* Esra — 3 era variants */
-  "bz-19": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
-  "bz-20": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
-  "bz-21": [["behzatc", "Esra Bulut"],                            ["trwiki", "Canan Ergüder"]],
+  "bz-19": [
+    ["behzatc", "Esra Bulut"],
+    ["trwiki", "Canan Ergüder"],
+  ],
+  "bz-20": [
+    ["behzatc", "Esra Bulut"],
+    ["trwiki", "Canan Ergüder"],
+  ],
+  "bz-21": [
+    ["behzatc", "Esra Bulut"],
+    ["trwiki", "Canan Ergüder"],
+  ],
   /* Supporting + villains */
-  "bz-22": [["behzatc", "Şevket Çakırbey"],                       ["trwiki", "Ege Aydan"]],
+  "bz-22": [
+    ["behzatc", "Şevket Çakırbey"],
+    ["trwiki", "Ege Aydan"],
+  ],
   "bz-23": [["behzatc", "Cevdet"]],
-  "bz-24": [["behzatc", "Selim"],                                  ["behzatc", "Çabuk Selim"]],
-  "bz-25": [["behzatc", "Tahsin Yılmaz"],                         ["trwiki", "Eray Eserol"]],
+  "bz-24": [
+    ["behzatc", "Selim"],
+    ["behzatc", "Çabuk Selim"],
+  ],
+  "bz-25": [
+    ["behzatc", "Tahsin Yılmaz"],
+    ["trwiki", "Eray Eserol"],
+  ],
   "bz-26": [["behzatc", "Ercüment Çözer"]],
   "bz-27": [["behzatc", "Memduh Başgan"]],
   "bz-28": [["behzatc", "Şule"]],
   "bz-29": [["behzatc", "Berna Çakırbey"]],
-  "bz-30": [["behzatc", "Mürsel"],                                 ["behzatc", "Mürsel Ateş"], ["behzatc", "Ateş"]],
+  "bz-30": [
+    ["behzatc", "Mürsel"],
+    ["behzatc", "Mürsel Ateş"],
+    ["behzatc", "Ateş"],
+  ],
 };
 
 const EXT_BY_MIME = {
@@ -309,7 +688,12 @@ function extFromUrl(u) {
 }
 
 async function fileExists(p) {
-  try { await stat(p); return true; } catch { return false; }
+  try {
+    await stat(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function fetchJson(url) {
@@ -429,7 +813,9 @@ function deckOf(id) {
   return null;
 }
 
-async function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+async function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 // Walk the full fallback chain for one card. Returns the first image
 // that downloads, or null if literally nothing in the chain worked.
@@ -465,7 +851,10 @@ async function resolveCardImage(id, candidates, notes) {
     const searchSources = [];
     for (const [sourceKey] of candidates) {
       if (sourceKey === "url") continue;
-      if (!tried.has(sourceKey)) { tried.add(sourceKey); searchSources.push(sourceKey); }
+      if (!tried.has(sourceKey)) {
+        tried.add(sourceKey);
+        searchSources.push(sourceKey);
+      }
     }
     if (!tried.has("wikipedia")) searchSources.push("wikipedia");
     const query = mwCandidate[1];
@@ -521,7 +910,11 @@ async function main() {
 
   let manifest = {};
   if (await fileExists(MANIFEST)) {
-    try { manifest = JSON.parse(await readFile(MANIFEST, "utf8")); } catch { manifest = {}; }
+    try {
+      manifest = JSON.parse(await readFile(MANIFEST, "utf8"));
+    } catch {
+      manifest = {};
+    }
   }
 
   const entries = Object.entries(CARDS);
@@ -562,7 +955,9 @@ async function main() {
       `  · commons:       ${stats.commons}\n` +
       `  · deck-fallback: ${stats["deck-fallback"]}`,
   );
-  console.log(`Manifest: src/data/card-art-manifest.json (${Object.keys(manifest).length} entries).`);
+  console.log(
+    `Manifest: src/data/card-art-manifest.json (${Object.keys(manifest).length} entries).`,
+  );
   if (failed.length) {
     console.log(`\n${failed.length} card(s) had no image even after all fallbacks:`);
     for (const [id, notes] of failed) {

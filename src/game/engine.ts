@@ -1,23 +1,7 @@
-import type { Card, DeckTheme, GameSnapshot, PlayerId, StatDef } from "./types";
+import type { Card, DeckTheme, GameSnapshot, PlayerId, StatDef } from "../types";
+import { shuffle } from "./rng";
 
-function mulberry32(seed: number) {
-  return function () {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-export function shuffle<T>(arr: T[], seed: number): T[] {
-  const out = [...arr];
-  const rnd = mulberry32(seed);
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rnd() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
+export { shuffle } from "./rng";
 
 function dealEven(cards: Card[]): { p1: Card[]; p2: Card[]; kitty: Card[] } {
   const p1: Card[] = [];
@@ -29,11 +13,7 @@ function dealEven(cards: Card[]): { p1: Card[]; p2: Card[]; kitty: Card[] } {
   return { p1, p2, kitty: [] };
 }
 
-export function compareStat(
-  a: number,
-  b: number,
-  higherIsBetter: boolean
-): "p1" | "p2" | "tie" {
+export function compareStat(a: number, b: number, higherIsBetter: boolean): "p1" | "p2" | "tie" {
   if (a === b) return "tie";
   if (higherIsBetter) return a > b ? "p1" : "p2";
   return a < b ? "p1" : "p2";
@@ -46,7 +26,7 @@ export function findStatDef(theme: DeckTheme, statId: string): StatDef | undefin
 export function newGame(
   theme: DeckTheme,
   seed: number,
-  bot: GameSnapshot["bot"] = null
+  bot: GameSnapshot["bot"] = null,
 ): GameSnapshot {
   const shuffled = shuffle(theme.cards, seed).map((c) => c.id);
   const byId = new Map(theme.cards.map((c) => [c.id, c]));
@@ -132,7 +112,6 @@ export function revealAndResolve(g: GameSnapshot): GameSnapshot {
 
   let nextP1 = g.p1.slice(1);
   let nextP2 = g.p2.slice(1);
-  let winner: PlayerId;
 
   if (outcome === "tie") {
     return {
@@ -157,7 +136,7 @@ export function revealAndResolve(g: GameSnapshot): GameSnapshot {
     };
   }
 
-  winner = outcome === "p1" ? 1 : 2;
+  const winner: PlayerId = outcome === "p1" ? 1 : 2;
   if (winner === 1) {
     nextP1 = appendBottom(nextP1, trick);
   } else {
@@ -230,16 +209,14 @@ export function abandonToHome(): GameSnapshot {
   };
 }
 
-export function pickThemeScreen(): Partial<GameSnapshot> {
-  return { screen: "theme_pick", theme: null };
-}
-
 /** Validates deck shape for release sanity. */
 export function validateDeck(theme: DeckTheme): string[] {
   const errors: string[] = [];
   const n = theme.cards.length;
-  if (n < 20 || n > 36) errors.push(`Card count ${n} should be typical Top Trumps range (e.g. 30).`);
-  if (theme.stats.length < 5 || theme.stats.length > 8) errors.push(`Stat count should be 5–8, got ${theme.stats.length}.`);
+  if (n < 20 || n > 36)
+    errors.push(`Card count ${n} should be typical Top Trumps range (e.g. 30).`);
+  if (theme.stats.length < 5 || theme.stats.length > 8)
+    errors.push(`Stat count should be 5–8, got ${theme.stats.length}.`);
   const statIds = new Set(theme.stats.map((s) => s.id));
   for (const c of theme.cards) {
     for (const sid of statIds) {
@@ -251,4 +228,3 @@ export function validateDeck(theme: DeckTheme): string[] {
   }
   return errors;
 }
-

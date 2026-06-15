@@ -1,5 +1,5 @@
 import type { Card, DeckTheme } from "../types";
-import artManifest from "./card-art-manifest.json";
+import artManifest from "../data/card-art-manifest.json";
 
 const PLACEHOLDER_IMG = `${import.meta.env.BASE_URL}card-placeholder.svg`;
 

@@ -1,0 +1,9 @@
+dist/
+docs/
+node_modules/
+playwright-report/
+test-results/
+package-lock.json
+src/data/card-art-manifest.json
+# Hand-aligned card data tables — keep the column formatting intact.
+src/game/decks.ts

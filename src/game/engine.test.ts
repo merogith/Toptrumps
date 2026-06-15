@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DECKS } from "./data/decks";
+import { DECKS } from "./decks";
 import {
   acknowledgePass,
   acknowledgeRevealPass,
@@ -88,7 +88,7 @@ describe("continueAfterRound", () => {
   it("transitions to game_over when a player has no cards", () => {
     const deck = DECKS[0];
     const c = deck.cards[0];
-    const g: import("./types").GameSnapshot = {
+    const g: import("../types").GameSnapshot = {
       screen: "round_result",
       theme: deck,
       shuffledIds: [],
