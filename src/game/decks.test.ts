@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DECKS } from "./decks";
-import { validateDeck } from "../engine";
+import { validateDeck } from "./engine";
 
 describe("DECKS data", () => {
   it("exposes six themes with 30 cards and six stats each", () => {

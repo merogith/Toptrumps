@@ -61,4 +61,3 @@ test("full playable loop from menu to game over", async ({ page }) => {
 
   throw new Error(`Did not reach game_over within ${maxSteps} UI steps`);
 });
-

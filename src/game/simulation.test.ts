@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DECKS } from "./data/decks";
+import { DECKS } from "./decks";
 import {
   acknowledgePass,
   acknowledgeRevealPass,
@@ -8,7 +8,7 @@ import {
   revealAndResolve,
   selectStat,
 } from "./engine";
-import type { GameSnapshot } from "./types";
+import type { GameSnapshot } from "../types";
 
 /**
  * Simulates the same steps the UI takes until the game ends.

@@ -1,5 +1,5 @@
 import type { Card, DeckTheme } from "../types";
-import artManifest from "./card-art-manifest.json";
+import artManifest from "../data/card-art-manifest.json";
 
 const PLACEHOLDER_IMG = `${import.meta.env.BASE_URL}card-placeholder.svg`;
 
@@ -194,7 +194,7 @@ const FN_CARDS: FnRaw[] = [
   { n:"Limmar Ponyets",      s:"Trader to the Askonian Republic",       ic:"💼", in:72, pi:70, fs:68, re:75, rs:68, lg:50 },
   { n:"Onum Barr",           s:"Siwennan patrician, father of Ducem",   ic:"🏡", in:65, pi:42, fs:58, re:60, rs:35, lg:42 },
   { n:"Quoriana Novi",       s:"Second Foundation plant",               ic:"🌿", in:70, pi:60, fs:75, re:72, rs:50, lg:60 },
-  { n:"Demerzel",            s:"Cleon's First Minister — R. Daneel",    ic:"🔵", in:95, pi:88, fs:95, re:99, rs:75, lg:90 },
+  { n:"Demerzel",            s:"Cleon's First Minister — R. Daneel",    ic:"🔵", in:90, pi:85, fs:88, re:80, rs:60, lg:80 },
   { n:"Raych Seldon",        s:"Hari's foster son, Foundation agent",   ic:"🗡️", in:72, pi:65, fs:68, re:88, rs:48, lg:62 },
 ];
 
@@ -549,6 +549,7 @@ export function getDeckById(id: string): DeckTheme | undefined {
   return DECKS.find((d) => d.id === id);
 }
 
-export function cardImageUrl(_deckId: string, _cardId: string): string {
+/** The generic placeholder image, used as the final fallback when card art fails to load. */
+export function cardPlaceholderUrl(): string {
   return PLACEHOLDER_IMG;
 }
