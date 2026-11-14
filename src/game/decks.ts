@@ -536,7 +536,51 @@ function buildBehzatDeck(): DeckTheme {
   };
 }
 
+function buildFieldLabDeck(): DeckTheme {
+  const stats = [
+    { id: "range", label: "Range", shortLabel: "RG", higherIsBetter: true },
+    { id: "speed", label: "Speed", shortLabel: "SP", higherIsBetter: true },
+    { id: "payload", label: "Payload", shortLabel: "PL", higherIsBetter: true },
+    { id: "endurance", label: "Endurance", shortLabel: "EN", higherIsBetter: true },
+    { id: "precision", label: "Precision", shortLabel: "PR", higherIsBetter: true },
+    { id: "agility", label: "Agility", shortLabel: "AG", higherIsBetter: true },
+  ];
+  const designs = [
+    "Beacon", "Ridge", "Delta", "Fjord", "Dune", "Cairn", "Mica", "Orbit", "Spruce", "Flint",
+    "Harbor", "Quartz", "Moraine", "Kestrel", "Tundra", "Slate", "Grove", "Summit", "Cobalt",
+    "Lichen", "Aspen", "Reef", "Basalt", "Talon", "Moss", "Rill", "Strata", "Cirrus", "Drift",
+    "Tern",
+  ];
+  const factors = [1, 29, 7, 23, 11, 19];
+  const offsets = [0, 29, 5, 24, 11, 18];
+  const accent = "#527d74";
+  const cards = designs.map((name, index): Card => {
+    const subtitle = "Field Lab rover";
+    return {
+      id: `field-lab-${String(index + 1).padStart(2, "0")}`,
+      name,
+      subtitle,
+      image: makeSvg("◇", name, subtitle, accent, "#102521", "#17312c", "#1f4038"),
+      // Paired ranks favor different categories and keep every design competitive.
+      stats: Object.fromEntries(
+        stats.map((stat, j) => [stat.id, 24 + ((index * factors[j] + offsets[j]) % 30) * 2]),
+      ),
+    };
+  });
+  return {
+    id: "field-lab",
+    title: "Field Lab",
+    tagline: "30 original survey rovers",
+    description: "Compare rover designs across six fictional capability ratings.",
+    accent,
+    accentSoft: "rgba(82,125,116,0.18)",
+    stats,
+    cards,
+  };
+}
+
 export const DECKS: DeckTheme[] = [
+  buildFieldLabDeck(),
   buildStarWarsDeck(),
   buildFoundationDeck(),
   buildMedievalDeck(),

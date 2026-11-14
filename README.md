@@ -2,9 +2,11 @@
 
 A polished, dependency-free **Top Trumps** card game for the browser. Play
 pass-and-play with a friend on one device, or take on a bot with three
-difficulty levels. Six themed decks, 30 cards each, six stats per card.
+difficulty levels. Seven themed decks, 30 cards each, six stats per card.
 
-**▶ Live demo: https://merogith.github.io/Toptrumps/**
+**[Play the demo](https://merogith.github.io/Toptrumps/)**
+
+Choose **Field Lab** for an original deck with inline SVG artwork. Select a mode, pick a stat on your card, and reveal the round to see the engine award both cards. [Round rules](src/game/engine.ts) · [Full-match browser test](e2e/play.spec.ts).
 
 Built with TypeScript and Vite. No framework, no runtime dependencies — the
 whole game ships as one small bundle (~20 kB gzipped).
