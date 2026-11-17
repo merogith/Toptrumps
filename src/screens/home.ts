@@ -2,6 +2,8 @@ import type { GameContext } from "../app/context";
 import { DECKS } from "../game/decks";
 import { el, escapeHtml } from "../ui/dom";
 import { announce } from "../ui/announce";
+import { newGame } from "../game/engine";
+import { randomSeed } from "../game/rng";
 
 /** Landing screen: title, primary actions, and a row of feature highlights. */
 export function renderHome(ctx: GameContext): HTMLElement {
@@ -17,7 +19,19 @@ export function renderHome(ctx: GameContext): HTMLElement {
 
   const actions = el("div", "home-actions");
 
-  const play = el("button", "btn btn-primary");
+  const quick = el("button", "btn btn-primary");
+  quick.type = "button";
+  quick.textContent = "Play Field Lab vs Easy bot";
+  quick.addEventListener("click", () => {
+    ctx.game = newGame(DECKS.find((deck) => deck.id === "field-lab")!, randomSeed(), {
+      player: 2,
+      difficulty: "easy",
+    });
+    announce("Field Lab started. Pick a stat on your card to challenge the bot.");
+    ctx.render();
+  });
+
+  const play = el("button", "btn btn-ghost");
   play.type = "button";
   play.textContent = "Choose deck";
   play.addEventListener("click", () => {
@@ -34,8 +48,13 @@ export function renderHome(ctx: GameContext): HTMLElement {
     ctx.render();
   });
 
-  actions.append(play, rules);
+  actions.append(quick, play, rules);
   frag.appendChild(actions);
+
+  const hint = el("p", "score-line");
+  hint.textContent =
+    "Start with 15 cards. Pick a stat, compare, and collect the winning pair. No account or setup needed.";
+  frag.appendChild(hint);
 
   const features = el("div", "home-feature-row");
   const chips: [string, string, string][] = [

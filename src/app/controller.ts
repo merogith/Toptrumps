@@ -149,6 +149,11 @@ export class GameController implements GameContext {
       }
 
       app.appendChild(main);
+      // Replacing a screen removes the focused control. Give keyboard users a
+      // stable starting point so Tab reaches the new screen's first action.
+      main.tabIndex = -1;
+      main.setAttribute("aria-label", main.querySelector("h1, h2")?.textContent || "Current round");
+      main.focus({ preventScroll: true });
       window.scrollTo({ top: 0, behavior: "instant" });
       this.scheduleBot();
     } catch (e) {

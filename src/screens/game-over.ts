@@ -20,8 +20,8 @@ export function renderGameOver(ctx: GameContext): HTMLElement {
   headline.textContent = g.winner ? `${playerLabel(g.winner, g)} wins!` : "Game over!";
   const sub = el("p");
   sub.textContent = g.winner
-    ? `${playerLabel(g.winner, g)} collected all 30 cards — classic Top Trumps victory.`
-    : "The deck ran out with no clear winner.";
+    ? `${playerLabel(g.winner, g)} collected all ${g.theme?.cards.length ?? 30} cards — classic Top Trumps victory.`
+    : `The final comparison tied with both piles empty. All ${g.kitty.length} cards are in the centre — a draw.`;
   hero.append(trophy, headline, sub);
   frag.appendChild(hero);
 

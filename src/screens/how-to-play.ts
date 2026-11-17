@@ -7,13 +7,16 @@ const STEPS: [string, string][] = [
   ["Pass the device", "Follow the privacy prompts so only the right player sees each screen."],
   [
     "Compare",
-    "Highest value in the chosen category wins the trick. Cards go to the bottom of the winner's pile.",
+    "Follow the arrow: ↑ higher wins, ↓ lower wins. Both played cards go to the bottom of the winner's pile.",
   ],
   [
     "Tie",
-    "Equal values send cards to the centre pile. Same leader plays again — winner takes everything.",
+    "Equal values send cards to the centre pile. Same leader plays again — the next winner takes the pair and centre pile. If a player runs out after a tie, the remaining player takes the centre pile. If both run out together, it is a draw.",
   ],
-  ["Win", "Collect all 30 cards to win the match!"],
+  [
+    "Win",
+    "Collect all 30 cards to win the match! You can rematch or choose another deck afterwards. Matches can run long; Abandon match returns you to the menu.",
+  ],
 ];
 
 /** Static rules screen. */

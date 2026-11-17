@@ -34,6 +34,11 @@ export function renderChooseStat(ctx: GameContext): HTMLElement {
   banner.append(dot, bannerText);
   frag.appendChild(banner);
 
+  const hint = el("p", "score-line");
+  hint.textContent =
+    "Choose a strength: ↑ higher wins · ↓ lower wins. The round winner chooses next.";
+  frag.appendChild(hint);
+
   const card = leaderCard(g);
   if (!card) {
     frag.appendChild(document.createTextNode("No cards remaining."));

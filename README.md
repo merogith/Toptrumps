@@ -6,7 +6,7 @@ difficulty levels. Seven themed decks, 30 cards each, six stats per card.
 
 **[Play the demo](https://merogith.github.io/Toptrumps/)**
 
-Choose **Field Lab** for an original deck with inline SVG artwork. Select a mode, pick a stat on your card, and reveal the round to see the engine award both cards. [Round rules](src/game/engine.ts) · [Full-match browser test](e2e/play.spec.ts).
+Choose **Play Field Lab vs Easy bot** to start immediately with original inline SVG artwork. Pick a stat (↑ higher wins, ↓ lower wins), compare the values, and collect both cards. The winner leads the next round; tied cards wait in the centre for the next winner. Use **Choose deck** for all seven decks and pass-and-play. Completed matches offer a rematch with the same mode and difficulty. [Round rules](src/game/engine.ts) · [Full-match browser test](e2e/play.spec.ts).
 
 Built with TypeScript and Vite. No framework, no runtime dependencies — the
 whole game ships as one small bundle (~20 kB gzipped).
@@ -21,7 +21,7 @@ whole game ships as one small bundle (~20 kB gzipped).
   gates per round so neither player sees the other's card.
 - **Three bot difficulties** — from a beatable amateur to a card-counter that
   tracks every card still in play and picks the stat with the best win rate.
-- **Six decks** — Star Wars, Foundation, Warriors of the Ages, Pokémon Gen 1,
+- **Seven decks** — Field Lab (original survey rovers), Star Wars, Foundation, Warriors of the Ages, Pokémon Gen 1,
   SpongeBob SquarePants, and Behzat Ç.
 - **Designed for phones** — touch-first layout, sticky action buttons, animated
   count-ups, optional haptics, and full `prefers-reduced-motion` support.
@@ -51,7 +51,7 @@ src/
     engine.ts                State machine: deal, select stat, resolve, win
     bot.ts                   Easy/Medium/Hard stat-selection AI
     rng.ts                   Seedable PRNG + Fisher–Yates shuffle
-    decks.ts                 The six decks + placeholder-art generator
+    decks.ts                 The seven decks + placeholder-art generator
 
   ui/                      Stateless presentation helpers
     dom.ts                   Element creation + HTML escaping
@@ -72,7 +72,7 @@ src/
     context.ts               The narrow interface screens receive
     controller.ts            Owns state, render dispatch, and the bot scheduler
 
-data/card-art-manifest.json  cardId → fetched image path
+src/data/card-art-manifest.json  cardId → fetched image path
 public/cards/                Card artwork (or fall back to generated SVGs)
 e2e/                         Playwright full-match test
 ```
@@ -113,10 +113,12 @@ Open the URL Vite prints (usually **http://localhost:5173/**).
 
 ## Testing
 
-- **Unit** (`src/game/*.test.ts`) — the engine state machine, bot decisions, and
-  RNG fairness/determinism.
+- **Unit** (`src/game/*.test.ts`) — the engine state machine, bot decisions, RNG
+  fairness/determinism, and conservation of all 30 unique cards through wins,
+  repeated ties, kitty collection and final-tie outcomes. Seeded complete matches
+  cover every deck with human choices and all three bot difficulties.
 - **Smoke** (`src/app/controller.smoke.test.ts`) — boots the real controller in
-  happy-dom and plays a complete 2-player match through the actual UI, proving
+  happy-dom and plays complete human and bot matches plus rematches through the actual UI, proving
   every screen renders and wires up without a browser.
 - **End-to-end** (`e2e/play.spec.ts`) — Playwright drives Chromium from the menu
   through a full match to game over.
@@ -127,6 +129,15 @@ npx playwright install chromium   # first time only
 npm run test:e2e                  # browser e2e
 ```
 
+## Match rules and limits
+
+The round winner takes both played cards and any centre pile. If a final tie
+exhausts one player’s pile, the remaining player collects the centre. If both
+piles run out on the same tie, the match is a draw. No cards are removed from play.
+Matches can run long, especially when repeatedly choosing the same category.
+There is no round limit or saved-match persistence; **Abandon match** returns
+to the menu and a page reload starts fresh.
+
 ## Card artwork
 
 Cards show the real subject's image when one has been fetched into
@@ -136,7 +147,7 @@ in `components/card.ts` is a final safety net.
 
 `npm run fetch:cards` (Node ≥18, no dependencies) pulls lead images from
 Wikipedia / Fandom MediaWiki APIs and merges the paths into
-`data/card-art-manifest.json`. CI runs this automatically before deploying.
+`src/data/card-art-manifest.json`. CI runs this automatically before deploying.
 
 ## Deployment (GitHub Pages)
 
@@ -153,7 +164,7 @@ Card subjects, names, and fetched thumbnails belong to their respective rights
 holders and are used here only for a **non-commercial, educational fan project**.
 Keep this repository non-commercial (no ads, paid distribution, or merchandise)
 and do not redistribute `public/cards/` as a standalone image set. To run with
-zero third-party imagery, empty `data/card-art-manifest.json` to `{}` and delete
+zero third-party imagery, empty `src/data/card-art-manifest.json` to `{}` and delete
 `public/cards/` — every card then uses the generated SVG.
 
 ## License

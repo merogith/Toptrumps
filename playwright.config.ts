@@ -11,6 +11,9 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:5173",
     trace: "on-first-retry",
+    launchOptions: process.env.CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH }
+      : {},
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

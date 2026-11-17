@@ -52,7 +52,7 @@ export function newGame(
 }
 
 function appendBottom(stack: Card[], won: Card[]): Card[] {
-  return [...stack.slice(1), ...won];
+  return [...stack, ...won];
 }
 
 function otherPlayer(p: PlayerId): PlayerId {
@@ -130,6 +130,7 @@ export function revealAndResolve(g: GameSnapshot): GameSnapshot {
         p2Value: v2,
         winner: "tie",
         higherIsBetter: stat.higherIsBetter,
+        cardsWon: 0,
       },
       screen: "round_result",
       deviceHolder: g.leader,
@@ -159,6 +160,7 @@ export function revealAndResolve(g: GameSnapshot): GameSnapshot {
       p2Value: v2,
       winner,
       higherIsBetter: stat.higherIsBetter,
+      cardsWon: trick.length,
     },
     screen: "round_result",
     deviceHolder: winner,
@@ -173,7 +175,17 @@ function resolveWinner(g: GameSnapshot): GameSnapshot {
   if (g.p1.length === 0 && g.p2.length > 0) winner = 2;
   else if (g.p2.length === 0 && g.p1.length > 0) winner = 1;
   else if (g.p1.length === 0 && g.p2.length === 0) winner = null;
-  return { ...g, winner, screen: "game_over", deviceHolder: winner ?? 1 };
+  // If a final tie exhausts one pile, the remaining player also takes the kitty.
+  // When both piles are empty, keep the cards in the kitty and declare a draw.
+  return {
+    ...g,
+    p1: winner === 1 ? [...g.p1, ...g.kitty] : g.p1,
+    p2: winner === 2 ? [...g.p2, ...g.kitty] : g.p2,
+    kitty: winner ? [] : g.kitty,
+    winner,
+    screen: "game_over",
+    deviceHolder: winner ?? 1,
+  };
 }
 
 export function continueAfterRound(g: GameSnapshot): GameSnapshot {

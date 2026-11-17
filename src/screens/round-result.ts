@@ -75,6 +75,14 @@ export function renderRoundResult(ctx: GameContext): HTMLElement {
   const statLine = el("p", "result-stat-line");
   statLine.innerHTML = `<strong>${escapeHtml(lr.statLabel)}</strong> · ${lr.higherIsBetter ? "higher wins" : "lower wins"}`;
   banner.append(icon, headline, statLine);
+  if (!isTie) {
+    const transfer = el("p", "result-stat-line");
+    // Both played cards plus the centre pile from before this round.
+    // The pile has already been awarded, so derive its size from the last
+    // result metadata rather than the now-empty kitty.
+    transfer.textContent = `${playerLabel(winnerPid!, g)} collects ${lr.cardsWon} cards${lr.cardsWon > 2 ? " including the centre pile" : " — the winning pair"}.`;
+    banner.appendChild(transfer);
+  }
   if (isTie) {
     const extra = el("p", "result-stat-line");
     extra.textContent = `${g.kitty.length} card${g.kitty.length !== 1 ? "s" : ""} go to the centre pile.`;
