@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DECKS } from "./decks";
+import { decideStat } from "./bot";
+import { mulberry32 } from "./rng";
 import {
   acknowledgePass,
   acknowledgeRevealPass,
@@ -8,47 +10,51 @@ import {
   revealAndResolve,
   selectStat,
 } from "./engine";
-import type { GameSnapshot } from "../types";
+import type { Difficulty, GameSnapshot } from "../types";
 
-/**
- * Simulates the same steps the UI takes until the game ends.
- * Proves a match always reaches game_over with a winner.
- */
-function stepGame(g: GameSnapshot): GameSnapshot {
-  switch (g.screen) {
-    case "pass_device":
-      return acknowledgePass(acknowledgePass(g));
-    case "choose_stat": {
-      const sid = g.theme!.stats[0].id;
-      return selectStat(g, sid);
-    }
-    case "reveal_prompt":
-      return acknowledgeRevealPass(g);
-    case "opponent_view":
-      return revealAndResolve(g);
-    case "round_result":
-      return continueAfterRound(g);
-    case "game_over":
-      return g;
-    default:
-      throw new Error(`Unexpected screen in simulation: ${g.screen}`);
-  }
+function cardIds(g: GameSnapshot): string[] {
+  return [...g.p1, ...g.p2, ...g.kitty].map((card) => card.id).sort();
 }
 
-describe("full match simulation", () => {
-  it("reaches game_over with a single winner for each deck (seed 0)", () => {
-    for (const deck of DECKS) {
-      let g = newGame(deck, 0);
-      let steps = 0;
-      const maxSteps = 5000;
-      while (g.screen !== "game_over" && steps < maxSteps) {
-        g = stepGame(g);
-        steps++;
-      }
-      expect(steps, deck.id).toBeLessThan(maxSteps);
-      expect(g.screen).toBe("game_over");
-      expect(g.winner).not.toBeNull();
-      expect(g.p1.length === 0 || g.p2.length === 0).toBe(true);
+describe("complete matches preserve every card", () => {
+  for (const deck of DECKS) {
+    for (const difficulty of [null, "easy", "medium", "hard"] as const) {
+      it(`${deck.id}: ${difficulty ?? "two humans"} reaches an outcome with the original deck`, () => {
+        const random = mulberry32(42);
+        const spy = vi.spyOn(Math, "random").mockImplementation(random);
+        try {
+          const bot = difficulty
+            ? { player: 2 as const, difficulty: difficulty as Difficulty }
+            : null;
+          let g = newGame(deck, 42, bot);
+          const original = cardIds(g);
+          let rounds = 0;
+          while (g.screen !== "game_over" && rounds < 10000) {
+            g = acknowledgePass(acknowledgePass(g));
+            const stat =
+              bot && g.leader === bot.player
+                ? decideStat(g, bot.player, bot.difficulty)
+                : deck.stats[Math.floor(random() * deck.stats.length)].id;
+            g = selectStat(g, stat);
+            g = acknowledgeRevealPass(g);
+            g = revealAndResolve(g);
+            expect(cardIds(g)).toEqual(original);
+            g = continueAfterRound(g);
+            expect(cardIds(g)).toEqual(original);
+            rounds++;
+          }
+          expect(g.screen).toBe("game_over");
+          if (g.winner) {
+            expect(g.winner === 1 ? g.p1 : g.p2).toHaveLength(deck.cards.length);
+            expect(g.kitty).toHaveLength(0);
+          } else {
+            expect(g.p1.length + g.p2.length).toBe(0);
+            expect(g.kitty).toHaveLength(deck.cards.length);
+          }
+        } finally {
+          spy.mockRestore();
+        }
+      });
     }
-  });
+  }
 });

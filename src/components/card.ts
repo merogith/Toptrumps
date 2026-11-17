@@ -83,7 +83,13 @@ export function renderCard(theme: DeckTheme, card: Card, opts: CardRenderOpts = 
     }
 
     const lbl = el("span", "stat-lbl");
-    lbl.textContent = s.label;
+    lbl.textContent = `${s.label} ${s.higherIsBetter ? "↑" : "↓"}`;
+    if (onStatSelect) {
+      row.setAttribute(
+        "aria-label",
+        `${s.label}: ${card.stats[s.id]}. ${s.higherIsBetter ? "Higher" : "Lower"} wins.`,
+      );
+    }
     const val = el("span", "stat-val");
     val.textContent = String(card.stats[s.id]);
 

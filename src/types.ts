@@ -65,6 +65,7 @@ export interface GameSnapshot {
     p2Value: number;
     winner: PlayerId | "tie";
     higherIsBetter: boolean;
+    cardsWon: number;
   } | null;
   winner: PlayerId | null;
   /** Null means 2-player pass-and-play. When set, that player is the bot. */
